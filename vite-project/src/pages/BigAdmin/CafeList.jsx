@@ -7,6 +7,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/config.js";
+import Navbar from "../../components/Navbar";
 
 export default function CafeList() {
   const [cafes, setCafes] = useState([]);

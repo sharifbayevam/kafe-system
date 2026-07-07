@@ -102,7 +102,7 @@ export default function Login() {
             label="Email"
             type="email"
             icon={<Mail />}
-            placeholder="siz@misol.com"
+            placeholder=""
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={errors.email}
