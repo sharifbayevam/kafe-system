@@ -6,7 +6,6 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-// Eslatma: secondaryAuth shu faylda mutlaqo mavjud bo'lishi shart!
 import { auth, db, secondaryAuth } from "../firebase/config.js";
 
 const AuthContext = createContext();
@@ -21,7 +20,7 @@ export function AuthProvider({ children }) {
   const [cafeId, setCafeId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Foydalanuvchi ma'lumotlarini Firestore'dan olish (rol, kafe id va h.k.)
+  // Foydalanuvchi ma'lumotlarini Firestore'dan olish
   const fetchUserData = async (uid) => {
     try {
       const userDocRef = doc(db, "users", uid);
@@ -44,7 +43,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Ro'yxatdan o'tish (masalan, kafe direktori ro'yxatdan o'tganda)
+  // Ro'yxatdan o'tish
   const register = async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -54,9 +53,8 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   };
 
-  // XODIM YARATISH — Direktor panelidan yangi xodim qo'shish
+  // XODIM YARATISH
   const registerStaff = async (email, password, extraData = {}) => {
-    // Agar config'da secondaryAuth sozlangan bo'lmasa, xato bermasligi uchun tekshiruv
     if (!secondaryAuth) {
       console.error("secondaryAuth Firebase config faylida topilmadi!");
       throw new Error("Firebase secondaryAuth sozlanmagan.");
@@ -70,20 +68,17 @@ export function AuthProvider({ children }) {
       );
       const newUser = userCredential.user;
 
-      // Firestore'dagi "users" kolleksiyasiga yozish
       await setDoc(doc(db, "users", newUser.uid), {
         email,
         fullName: extraData.fullName || "",
         role: extraData.role || "waiter",
-        cafeId: extraData.cafeId || cafeId, // joriy admin kafeId'si olinadi
+        cafeId: extraData.cafeId || cafeId,
         phone: extraData.phone || "",
         status: extraData.status || "active",
         createdAt: serverTimestamp(),
       });
 
-      // Secondary app sessiyasini tozalash
       await signOut(secondaryAuth);
-
       return newUser;
     } catch (error) {
       console.error("Xodim yaratishda xatolik:", error);
@@ -91,37 +86,47 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Kirish
+  // Kirish funksiyasi ichida setRole va setCafeId darhol yangilanishini ta'minlaymiz
   const login = async (email, password) => {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const data = await fetchUserData(userCredential.user.uid);
-    return data?.role || null;
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const data = await fetchUserData(userCredential.user.uid);
+      setLoading(false);
+      return data?.role || null;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
   };
 
   // Chiqish
   const logout = async () => {
+    setLoading(true);
     await signOut(auth);
     setUser(null);
     setRole(null);
     setCafeId(null);
+    setLoading(false);
   };
 
+  // MUHIM TO'G'RILANISH: Asinxron zanjirni to'g'ri boshqarish
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setLoading(true);
+      setLoading(true); // Yuklanishni boshlaymiz
       if (currentUser) {
         setUser(currentUser);
-        await fetchUserData(currentUser.uid);
+        await fetchUserData(currentUser.uid); // Firestore'dan ma'lumot to'liq kelishini kutadi
       } else {
         setUser(null);
         setRole(null);
         setCafeId(null);
       }
-      setLoading(false);
+      setLoading(false); // Faqat barcha ma'lumotlar yuklanib bo'lingach yopiladi
     });
     return () => unsubscribe();
   }, []);
