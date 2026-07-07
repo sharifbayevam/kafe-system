@@ -7,7 +7,6 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/config.js";
-import Navbar from "../../components/Navbar";
 
 export default function CafeList() {
   const [cafes, setCafes] = useState([]);
@@ -119,20 +118,15 @@ export default function CafeList() {
     return new Date(endDate) < new Date();
   };
 
-if (loading) {
-  return (
-    <>
-      <Navbar />
+  if (loading) {
+    return (
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-500 text-lg">Yuklanmoqda...</p>
       </div>
-    </>
-  );
-}
+    );
+  }
 
-return (
-  <>
-    <Navbar />
+  return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-amber-800">
@@ -271,7 +265,7 @@ return (
                   value={form.name}
                   onChange={handleChange}
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Kafe nomi"
+                  placeholder="Masalan: Dasturxon Chinor"
                 />
               </div>
 
@@ -299,7 +293,7 @@ return (
                   value={form.phone}
                   onChange={handleChange}
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="raqam kiriting"
+                  placeholder="+998 90 123 45 67"
                 />
               </div>
 
@@ -367,6 +361,5 @@ return (
         </div>
       )}
     </div>
-  </>
   );
 }
