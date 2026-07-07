@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase/config";
+import { auth, db } from "../firebase/config.js";
 
 const AuthContext = createContext();
 
@@ -25,7 +25,6 @@ export function AuthProvider({ children }) {
     try {
       const userDocRef = doc(db, "users", uid);
       const userDocSnap = await getDoc(userDocRef);
-
       if (userDocSnap.exists()) {
         const data = userDocSnap.data();
         setRole(data.role || null);
@@ -61,8 +60,8 @@ export function AuthProvider({ children }) {
       email,
       password
     );
-    await fetchUserData(userCredential.user.uid);
-    return userCredential.user;
+    const data = await fetchUserData(userCredential.user.uid);
+    return data?.role || null;
   };
 
   // Chiqish
@@ -86,7 +85,6 @@ export function AuthProvider({ children }) {
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 

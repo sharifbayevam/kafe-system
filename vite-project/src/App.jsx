@@ -16,6 +16,7 @@ import OrderForm from "./pages/Waiter/OrderForm";
 import KitchenQueue from "./pages/Chef/KitchenQueue";
 
 import Billing from "./pages/Cashier/Billing";
+import ErrorBoundary from "./ErrorBoundary";
 
 // Rolga qarab ruxsat berish uchun wrapper komponent
 function ProtectedRoute({ children, allowedRoles }) {
@@ -154,12 +155,15 @@ function AppRoutes() {
 
 function App() {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
-export default App;
+export default App; 
+

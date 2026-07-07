@@ -1,7 +1,6 @@
 import React, { useId, useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
-
 const SIZE_STYLES = {
   sm: "text-xs py-1.5 px-3 rounded-lg",
   md: "text-sm py-2.5 px-3.5 rounded-xl",
@@ -16,19 +15,6 @@ function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-/**
- * @param {Object} props
- * @param {string} [props.label] - Input tepasidagi yorliq
- * @param {string} [props.helperText] - Xatolik yo'q paytida ko'rsatiladigan yordamchi matn
- * @param {string} [props.error] - Xatolik matni; berilsa, input qizil chegara bilan ko'rsatiladi
- * @param {React.ReactNode} [props.icon] - Chap tarafdagi ikonka
- * @param {"sm"|"md"|"lg"} [props.size="md"]
- * @param {boolean} [props.fullWidth=true]
- * @param {boolean} [props.required=false]
- * @param {string} [props.type="text"]
- * @param {string} [props.className] - Tashqi wrapper uchun qo'shimcha klasslar
- * @param {string} [props.inputClassName] - <input/> elementining o'ziga qo'shimcha klasslar
- */
 export default function Input({
   label,
   helperText,
@@ -66,9 +52,7 @@ export default function Input({
       <div className="relative">
         {icon && (
           <span className="absolute left-3 top-0 bottom-0 flex items-center text-[#8E8676] pointer-events-none">
-            {React.isValidElement(icon)
-              ? React.cloneElement(icon, { size: ICON_SIZE[size] })
-              : icon}
+            {icon}
           </span>
         )}
 

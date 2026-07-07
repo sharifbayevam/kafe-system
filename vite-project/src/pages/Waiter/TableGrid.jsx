@@ -9,7 +9,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import { db } from "../../firebase/config.js";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 

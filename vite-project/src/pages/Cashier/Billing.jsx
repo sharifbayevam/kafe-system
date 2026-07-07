@@ -7,9 +7,8 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import { db } from "../../firebase/config.js";
 import { useAuth } from "../../context/AuthContext";
-
 export default function Billing() {
   const { cafeId } = useAuth();
   const [orders, setOrders] = useState([]);
