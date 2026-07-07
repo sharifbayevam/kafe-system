@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
-
+import "./Button.css"; 
  
 const VARIANT_STYLES = {
   primary: "bg-[#1B3A6B] text-white hover:bg-[#16305A] active:bg-[#122748] disabled:bg-[#1B3A6B]/40",

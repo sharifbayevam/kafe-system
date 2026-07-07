@@ -1,155 +1,111 @@
-@import "tailwindcss";
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-@layer base {
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
   :root {
-    /* Umumiy & Light Mode ranglar */
-    --background: #fcfaf6; /* Milliy kulolchilik va qog'oz ohangi */
-    --text-main: #2d2219; /* To'q jigarrang/shokolad toni (qoradan ko'ra yumshoqroq) */
-    --text-muted: #716357;
-    --border-color: #eaddcd;
-    
-    /* Har bir panel uchun maxsus brend ranglar palitrasi */
-    --bigadmin-primary: #1e3a8a; /* To'q ko'k - Davlatchilik, jiddiylik */
-    --admin-primary: #0f766e;    /* Zumrad yashil - Biznes va farovonlik */
-    --waiter-primary: #d97706;   /* Amber/Oltin - Chaqqonlik, mehmondo'stlik */
-    --chef-primary: #be123c;     /* To'q qizil - Olov, oshxona energiyasi */
-    --cashier-primary: #047857;  /* Pul/Kassa yashili */
-
-    /* Animatsiya va silliqlik ko'rsatkichi */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
 
-  .dark {
-    /* Dark Mode ranglar palitrasi */
-    --background: #121212;
-    --text-main: #f3f4f6;
-    --text-muted: #9ca3af;
-    --border-color: #2d2d2d;
-    
-    --bigadmin-primary: #3b82f6;
-    --admin-primary: #14b8a6;
-    --waiter-primary: #f59e0b;
-    --chef-primary: #f43f5e;
-    --cashier-primary: #10b981;
-  }
-
-  body {
-    background-color: var(--background);
-    color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    transition: var(--transition-smooth);
-    overflow-x: hidden;
-    /* Faqat mobil va planshet uchun cheklov (Desktopda markazlashtirilgan mobil ko'rinish) */
-    max-width: 768px;
-    margin: 0 auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-    min-height: 100vh;
+  #social .button-icon {
+    filter: invert(1) brightness(2);
   }
 }
 
-@layer components {
-  /* --- MILLIY ELEMENTLAR VA FONLAR --- */
-  .bg-pattern-national {
-    /* assets/ ichidagi milliy naqsh foni yoki CSS gradiyentli milliy geometriya */
-    background-image: url('/src/assets/national-pattern.svg');
-    background-repeat: repeat;
-    background-size: 100px;
-    opacity: 0.04;
-  }
-  
-  .dark .bg-pattern-national {
-    opacity: 0.02;
-  }
-
-  .national-border {
-    border-image: linear-gradient(to right, #d97706, #0f766e, #be123c) 1;
-  }
-
-  /* --- REALTIME NAVBAT (FIFO) VA ANIMATSIYALAR --- */
-  @keyframes slideInUp {
-    from {
-      transform: translateY(30px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes pulseSoft {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(0.98); }
-  }
-
-  /* FIFO tizimida yangi buyurtma kelganda qo'shiladigan klass */
-  .animate-new-order {
-    animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  }
-
-  /* Kutilayotgan/Tayyorlanayotgan buyurtma pulsatsiyasi */
-  .status-pulse {
-    animation: pulseSoft 2s infinite ease-in-out;
-  }
-
-  /* --- SILLIQ O'TISHLAR VA RENDER (UI/UX) --- */
-  .smooth-transition {
-    transition: var(--transition-smooth);
-  }
-
-  /* Mobil uchun silliq skroll (Menyu katalogi va buyurtma ro'yxatlari uchun) */
-  .scroll-smooth-bounce {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* --- ROLLAR UCHUN DINAMIK STRUKTURALAR --- */
-  /* Big Admin elementlari */
-  .btn-bigadmin { background-color: var(--bigadmin-primary); color: white; }
-  .text-bigadmin { color: var(--bigadmin-primary); }
-  
-  /* Cafe Admin elementlari */
-  .btn-admin { background-color: var(--admin-primary); color: white; }
-  .text-admin { color: var(--admin-primary); }
-
-  /* Waiter (Ofitsiant) elementlari */
-  .btn-waiter { background-color: var(--waiter-primary); color: white; }
-  .text-waiter { color: var(--waiter-primary); }
-  
-  /* Chef (Oshpaz) elementlari */
-  .btn-chef { background-color: var(--chef-primary); color: white; }
-  .text-chef { color: var(--chef-primary); }
-
-  /* Cashier (Kassa) elementlari */
-  .btn-cashier { background-color: var(--cashier-primary); color: white; }
-  .text-cashier { color: var(--cashier-primary); }
-
-  /* --- STOLLAR GRIDI (Waiter Panel) --- */
-  .table-grid-item {
-    @apply flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 shadow-sm relative overflow-hidden;
-  }
-  .table-free {
-    @apply bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-400;
-  }
-  .table-busy {
-    @apply bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-400 status-pulse;
-  }
+body {
+  margin: 0;
 }
 
-/* --- TAILWIND KLASSIK INPUT VA UTILITY SILLIQLASHTIRISH --- */
-input, select, textarea {
-  @apply outline-none transition-all duration-200;
-  border-color: var(--border-color);
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-input:focus, select:focus, textarea:focus {
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); /* Standart fokus holati */
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
 }
 
-/* Tizimning desktop brauzerlarda chiroyli ko'rinishi uchun konteyner (Faqat Mobile/Tablet bo'lgani uchun) */
-@media (min-width: 769px) {
-  html {
-    background-color: #1e1e24; /* Desktop fonini to'q qilib, o'rtadagi mobil ilovani ajratib ko'rsatamiz */
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
   }
 }
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
 
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
