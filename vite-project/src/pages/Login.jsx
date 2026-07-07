@@ -81,7 +81,7 @@ export default function Login() {
             <LogIn size={26} className="text-white relative" />
           </div>
           <h1 className="disp text-2xl font-extrabold text-[#241F19] tracking-tight">
-            Chaikhana Nazorat
+            Tizimga kirish
           </h1>
           <p className="text-sm text-[#8E8676] mt-1">Tizimga kirish uchun ma'lumotlaringizni kiriting</p>
         </div>
