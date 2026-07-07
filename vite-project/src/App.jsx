@@ -1,20 +1,15 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-
+import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
-
 import CafeList from "./pages/BigAdmin/CafeList";
-
 import Analytics from "./pages/Admin/Analytics";
 import MenuManager from "./pages/Admin/MenuManager";
 import StaffList from "./pages/Admin/StaffList";
-
 import TableGrid from "./pages/Waiter/TableGrid";
 import OrderForm from "./pages/Waiter/OrderForm";
-
 import KitchenQueue from "./pages/Chef/KitchenQueue";
-
 import Billing from "./pages/Cashier/Billing";
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -38,16 +33,19 @@ function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }
 
 // Foydalanuvchi rolga qarab bosh sahifaga yo'naltiriladi
 function RoleRedirect() {
   const { user, role, loading } = useAuth();
-
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-
   switch (role) {
     case "bigadmin":
       return <Navigate to="/bigadmin/cafes" replace />;
@@ -156,14 +154,13 @@ function AppRoutes() {
 function App() {
   return (
     <ErrorBoundary>
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
 
-export default App; 
-
+export default App;
