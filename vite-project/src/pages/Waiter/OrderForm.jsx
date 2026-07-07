@@ -6,8 +6,11 @@ import {
   onSnapshot,
   addDoc,
 } from "firebase/firestore";
+
 import { db } from "../../firebase/config.js";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify"; // Xabarnomalar uchun qo'shildi
+import "./OrderForm.css";
 
 export default function OrderForm() {
   const { cafeId } = useAuth();
@@ -20,6 +23,7 @@ export default function OrderForm() {
   const [submitting, setSubmitting] = useState(false);
   const [showCart, setShowCart] = useState(false);
 
+  // 1. Menyu taomlarini real-time yuklash
   useEffect(() => {
     if (!cafeId) return;
 
@@ -36,6 +40,37 @@ export default function OrderForm() {
       }));
       setMenu(data);
       setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [cafeId]);
+
+  // 2. Real-time xabarnomalar: Oshpaz taomni tayyor qilsa, ofitsiantga bildirishnoma yuborish
+  useEffect(() => {
+    if (!cafeId) return;
+
+    const q = query(
+      collection(db, "orders"),
+      where("cafeId", "==", cafeId),
+      where("kitchenStatus", "==", "ready") // Oshpaz 'ready' qilgan buyurtmalar
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "modified" || change.type === "added") {
+          const orderData = change.doc.data();
+          
+          // Ekran chetida bildirishnoma chiqarish
+          toast.success(`🛎️ ${orderData.tableNumber}-stol buyurtmasi tayyor! Oshpazdan olib ketishingiz mumkin.`, {
+            style: { backgroundColor: '#8B4513', color: '#FFF' },
+            icon: "🍲"
+          });
+
+          // Qisqa ovozli signal (Ding)
+          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav");
+          audio.play().catch((e) => console.log("Ovoz ijro etish ruxsatnomasi yo'q: ", e));
+        }
+      });
     });
 
     return () => unsubscribe();
@@ -117,7 +152,7 @@ export default function OrderForm() {
       setTableNumber("");
       setNote("");
       setShowCart(false);
-      alert("Buyurtma muvaffaqiyatli yuborildi!");
+      toast.info("🚀 Buyurtma oshxonaga yuborildi!");
     } catch (error) {
       console.error("Buyurtmani yuborishda xatolik:", error);
       alert("Xatolik yuz berdi, qaytadan urinib ko'ring");
@@ -135,7 +170,7 @@ export default function OrderForm() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto pb-24">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto pb-24 overflow-x-hidden">
       <h1 className="text-2xl font-bold text-amber-800 mb-4">
         Yangi buyurtma
       </h1>
@@ -171,17 +206,25 @@ export default function OrderForm() {
         ))}
       </div>
 
-      {/* Menyu ro'yxati */}
+      {/* Menyu ro'yxati (Ikki tomondan kirib keladigan animatsiya bilan) */}
       {filteredMenu.length === 0 ? (
         <p className="text-gray-400 text-sm">Taomlar topilmadi</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filteredMenu.map((dish) => {
+          {filteredMenu.map((dish, index) => {
             const qty = getQuantityInCart(dish.id);
+            
+            // Toq va juft indekslar uchun chap/o'ng klasslar
+            const animationClass = index % 2 === 0 ? "animate-fade-left" : "animate-fade-right";
+
             return (
               <div
                 key={dish.id}
-                className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex"
+                className={`bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex ${animationClass}`}
+                style={{
+                  animationDelay: `${index * 0.06}s`,
+                  opacity: 0, // Animatsiya boshlanguncha element yashirin turadi
+                }}
               >
                 <img
                   src={

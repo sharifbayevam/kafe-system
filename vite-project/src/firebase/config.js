@@ -1,12 +1,9 @@
+import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDqFkcef0rQlRRswa698On3DgNd6XdbvBs",
   authDomain: "kafe-boshqaruv-tizimi.firebaseapp.com",
@@ -17,8 +14,14 @@ const firebaseConfig = {
   measurementId: "G-PKJXQZ57JX"
 };
 
-// Initialize Firebase
+// Asosiy ilovani ishga tushirish
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// Admin (Direktor) sessiyasi buzilmasligi uchun ikkinchi ilovani ochamiz
+const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+
+// Eksport qilinadigan obyektlar
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const secondaryAuth = getAuth(secondaryApp); // MANA SHU QATOR XATONI TUZATADI!

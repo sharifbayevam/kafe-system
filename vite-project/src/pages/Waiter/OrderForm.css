@@ -1,0 +1,30 @@
+/* src/pages/Waiter/OrderForm.css */
+
+@keyframes slideFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-left {
+  animation: slideFromLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-fade-right {
+  animation: slideFromRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

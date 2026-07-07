@@ -12,6 +12,9 @@ import OrderForm from "./pages/Waiter/OrderForm";
 import KitchenQueue from "./pages/Chef/KitchenQueue";
 import Billing from "./pages/Cashier/Billing";
 import ErrorBoundary from "./ErrorBoundary";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Sidebar from "./components/Sidebar";
 
 // Rolga qarab ruxsat berish uchun wrapper komponent
 function ProtectedRoute({ children, allowedRoles }) {
@@ -25,20 +28,26 @@ function ProtectedRoute({ children, allowedRoles }) {
     );
   }
 
-  if (!user) {
+  if (!user || (allowedRoles && !allowedRoles.includes(role))) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    return <Navigate to="/login" replace />;
-  }
+  const isAdmin = role === "admin";
 
-  return (
-    <>
-      <Navbar />
-      {children}
-    </>
-  );
+
+return (
+  <>
+    <Navbar />
+    <div className="flex">
+      {(role === "admin" || role === "waiter") && <Sidebar />}
+      <div className="flex-1 p-4 bg-[#FDFBF7]">
+        {children}
+      </div>
+    </div>
+    {/* Xabarnomalar oynasi */}
+    <ToastContainer position="top-right" autoClose={4000} theme="colored" />
+  </>
+);
 }
 
 // Foydalanuvchi rolga qarab bosh sahifaga yo'naltiriladi
@@ -50,7 +59,7 @@ function RoleRedirect() {
     case "bigadmin":
       return <Navigate to="/bigadmin/cafes" replace />;
     case "admin":
-      return <Navigate to="/admin/analytics" replace />;
+      return <Navigate to="/admin/menu" replace />;
     case "waiter":
       return <Navigate to="/waiter/tables" replace />;
     case "chef":

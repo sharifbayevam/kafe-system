@@ -4,15 +4,16 @@ import { Mail, Lock, LogIn } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase/config.js";
 
-
-
+// App.jsx faylingizdagi aniq boshlang'ich yo'nalishlar (Redirect manzillari)
 const ROLE_ROUTES = {
-  bigadmin: "/bigadmin",
-  admin: "/admin",
-  waiter: "/waiter",
-  chef: "/chef",
-  cashier: "/cashier",
+  bigadmin: "/bigadmin/cafes",
+  admin: "/admin/menu",
+  waiter: "/waiter/tables",
+  chef: "/chef/queue",
+  cashier: "/cashier/billing",
 };
 
 const ERROR_MESSAGES = {
@@ -27,7 +28,7 @@ const ERROR_MESSAGES = {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, setAuthData } = useAuth(); // setAuthData context'da holatni qo'lda yangilash uchun (agar mavjud bo'lsa)
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,13 +52,48 @@ export default function Login() {
     if (!validate()) return;
 
     setSubmitting(true);
+    const cleanedEmail = email.trim();
+
     try {
-      const loggedInRole = await login(email.trim(), password);
+      // 1. Birinchi bo'lib Firebase Auth (BigAdmin / Admin) orqali kirishga urinib ko'radi
+      const loggedInRole = await login(cleanedEmail, password);
       const target = ROLE_ROUTES[loggedInRole] || "/";
       navigate(target, { replace: true });
     } catch (err) {
-      const code = err?.code || "default";
-      setFormError(ERROR_MESSAGES[code] || ERROR_MESSAGES.default);
+      // 2. Agar Firebase Auth'da xatolik bersa (masalan, ishchi kiritilgan bo'lsa), Firestore'dan qidiradi
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", cleanedEmail),
+          where("password", "==", password) // Admin xodimlar ro'yxatida bergan oddiy parol
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const staffUser = querySnapshot.docs[0].data();
+          const staffRole = staffUser.role;
+
+          // Context ichidagi user ma'lumotlarini yangilash funksiyasi (Agar AuthContext'da yozilgan bo'lsa)
+          if (typeof setAuthData === "function") {
+            setAuthData({
+              user: staffUser,
+              role: staffRole,
+              cafeId: staffUser.cafeId
+            });
+          }
+
+          const target = ROLE_ROUTES[staffRole] || "/";
+          navigate(target, { replace: true });
+        } else {
+          // Agar Firestore'da ham topilmasa, asosiy Firebase xatoligini ko'rsatadi
+          const code = err?.code || "default";
+          setFormError(ERROR_MESSAGES[code] || ERROR_MESSAGES.default);
+        }
+      } catch (firestoreErr) {
+        console.error("Firestore'dan xodimlarni tekshirishda xatolik:", firestoreErr);
+        setFormError("Tizimga kirishda ichki xatolik yuz berdi.");
+      }
     } finally {
       setSubmitting(false);
     }

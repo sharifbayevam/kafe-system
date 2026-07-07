@@ -5,8 +5,9 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase/config.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+// Eslatma: secondaryAuth shu faylda mutlaqo mavjud bo'lishi shart!
+import { auth, db, secondaryAuth } from "../firebase/config.js";
 
 const AuthContext = createContext();
 
@@ -43,7 +44,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Ro'yxatdan o'tish
+  // Ro'yxatdan o'tish (masalan, kafe direktori ro'yxatdan o'tganda)
   const register = async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -51,6 +52,43 @@ export function AuthProvider({ children }) {
       password
     );
     return userCredential.user;
+  };
+
+  // XODIM YARATISH — Direktor panelidan yangi xodim qo'shish
+  const registerStaff = async (email, password, extraData = {}) => {
+    // Agar config'da secondaryAuth sozlangan bo'lmasa, xato bermasligi uchun tekshiruv
+    if (!secondaryAuth) {
+      console.error("secondaryAuth Firebase config faylida topilmadi!");
+      throw new Error("Firebase secondaryAuth sozlanmagan.");
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        secondaryAuth,
+        email,
+        password
+      );
+      const newUser = userCredential.user;
+
+      // Firestore'dagi "users" kolleksiyasiga yozish
+      await setDoc(doc(db, "users", newUser.uid), {
+        email,
+        fullName: extraData.fullName || "",
+        role: extraData.role || "waiter",
+        cafeId: extraData.cafeId || cafeId, // joriy admin kafeId'si olinadi
+        phone: extraData.phone || "",
+        status: extraData.status || "active",
+        createdAt: serverTimestamp(),
+      });
+
+      // Secondary app sessiyasini tozalash
+      await signOut(secondaryAuth);
+
+      return newUser;
+    } catch (error) {
+      console.error("Xodim yaratishda xatolik:", error);
+      throw error;
+    }
   };
 
   // Kirish
@@ -95,6 +133,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    registerStaff,
     logout,
   };
 
