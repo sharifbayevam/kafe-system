@@ -119,15 +119,20 @@ export default function CafeList() {
     return new Date(endDate) < new Date();
   };
 
-  if (loading) {
-    return (
+if (loading) {
+  return (
+    <>
+      <Navbar />
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-500 text-lg">Yuklanmoqda...</p>
       </div>
-    );
-  }
+    </>
+  );
+}
 
-  return (
+return (
+  <>
+    <Navbar />
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-amber-800">
@@ -362,5 +367,6 @@ export default function CafeList() {
         </div>
       )}
     </div>
+  </>
   );
 }
