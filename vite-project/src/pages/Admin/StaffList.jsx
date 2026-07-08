@@ -4,7 +4,6 @@ import {
   query,
   where,
   onSnapshot,
-  addDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -29,16 +28,16 @@ import {
 } from "lucide-react";
 
 export default function StaffList() {
-  const { cafeId } = useAuth();
+  const { cafeId, registerStaff } = useAuth(); // registerStaff funksiyasi context'dan olindi
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
-  const [activeTab, setActiveTab] = useState("staff"); // staff, salary
+  const [activeTab, setActiveTab] = useState("staff");
 
   const [form, setForm] = useState({
     fullName: "",
-    email: "",
+    username: "", // Email o'rniga direktor tushunadigan sodda username qilindi
     password: "",
     role: "waiter",
     phone: "",
@@ -49,7 +48,6 @@ export default function StaffList() {
   useEffect(() => {
     if (!cafeId) return;
 
-    // Login.jsx bilan mos bo'lishi uchun xodimlarni 'users' kolleksiyasidan olamiz
     const q = query(collection(db, "users"), where("cafeId", "==", cafeId));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -57,7 +55,6 @@ export default function StaffList() {
         id: d.id,
         ...d.data(),
       }));
-      // Faqat tizim administratorlari bo'lmagan xodimlarni ajratib ko'rsatish (ixtiyoriy)
       setStaff(data.filter(u => u.role !== "bigadmin"));
       setLoading(false);
     });
@@ -75,7 +72,7 @@ export default function StaffList() {
   const resetForm = () => {
     setForm({
       fullName: "",
-      email: "",
+      username: "",
       password: "",
       role: "waiter",
       phone: "",
@@ -91,9 +88,12 @@ export default function StaffList() {
   };
 
   const openEditModal = (person) => {
+    // Tahrirlashda foydalanuvchining emailidan @kafe.com qismini olib tashlab ko'rsatamiz
+    const currentUsername = person.email ? person.email.split("@")[0] : "";
+    
     setForm({
       fullName: person.fullName || "",
-      email: person.email || "",
+      username: currentUsername,
       password: person.password || "",
       role: person.role || "waiter",
       phone: person.phone || "",
@@ -112,37 +112,43 @@ export default function StaffList() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.fullName || !form.phone || !form.email || !form.password) {
-      alert("Iltimos, barcha majburiy maydonlarni (Ism, Email, Parol, Telefon) kiriting");
+    if (!form.fullName || !form.phone || !form.username || !form.password) {
+      alert("Iltimos, barcha majburiy maydonlarni (Ism, Login, Parol, Telefon) kiriting");
       return;
     }
 
-    const staffData = {
+    // MUHIM JOYA: Direktor kiritgan sodda loginni orqasiga avtomat @kafe.com ulanadi
+    const fullEmail = `${form.username.trim().toLowerCase()}@kafe.com`;
+
+    const extraData = {
       cafeId,
       fullName: form.fullName,
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
       role: form.role,
       phone: form.phone,
       salary: Number(form.salary) || 0,
       status: form.status,
+      // Tahrirlash paytida asoratsiz yangilanishi uchun parolni ham saqlaymiz
+      password: form.password, 
     };
 
     try {
       if (editingStaff) {
-        await updateDoc(doc(db, "users", editingStaff.id), staffData);
-      } else {
-        await addDoc(collection(db, "users"), {
-          ...staffData,
-          createdAt: new Date(),
-          salaryHistory: [],
+        // Tahrirlash bo'lsa shunchaki Firestore'dagi hujjatini yangilaymiz
+        await updateDoc(doc(db, "users", editingStaff.id), {
+          ...extraData,
+          email: fullEmail
         });
+        alert("Xodim ma'lumotlari muvaffaqiyatli yangilandi!");
+      } else {
+        // Yangi xodim qo'shish bo'lsa Context'dagi registerStaff avtomat ham Auth'da ham Firestore'da ochadi!
+        await registerStaff(fullEmail, form.password, extraData);
+        alert("Yangi xodim muvaffaqiyatli qo'shildi!");
       }
       setModalOpen(false);
       resetForm();
     } catch (error) {
       console.error("Xodimni saqlashda xatolik:", error);
-      alert("Xatolik yuz berdi, qaytadan urinib ko'ring");
+      alert("Xatolik yuz berdi! Ehtimol, bunday loginli xodim allaqachon mavjud yoki Firebase sozlamasi yoqilmagan.");
     }
   };
 
@@ -385,19 +391,25 @@ export default function StaffList() {
                 />
               </div>
 
-              {/* Tizimga kirish Login qismi (Email) */}
+              {/* Tizimga kirish Login qismi (Faqat Login so'zi yoziladi) */}
               <div>
                 <label className="text-xs font-bold text-gray-600 flex items-center gap-1 mb-1">
-                  <Mail className="w-3 h-3 text-gray-400" /> Email (Tizim logini)
+                  <Mail className="w-3 h-3 text-gray-400" /> Xodim logini 
                 </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
-                  placeholder="ishchi@chaikhana.com"
-                />
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    name="username"
+                    disabled={!!editingStaff} // Tahrirlashda o'zgartirib bo'lmaydi
+                    value={form.username}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37] pr-24 disabled:bg-gray-50"
+                    placeholder="login kiriting"
+                  />
+                  <span className="absolute right-3 text-xs text-gray-400 font-semibold select-none">
+                    @kafe.com
+                  </span>
+                </div>
               </div>
 
               {/* Tizimga kirish Parol qismi */}

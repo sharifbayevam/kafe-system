@@ -114,7 +114,7 @@ export default function Login() {
             label="Parol"
             type="password"
             icon={<Lock />}
-            placeholder="••••••••"
+            placeholder="parolingizni kiriting"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={errors.password}
