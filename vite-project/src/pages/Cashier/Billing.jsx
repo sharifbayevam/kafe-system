@@ -17,6 +17,7 @@ export default function Billing() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("unpaid"); // unpaid, paid, all
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [discountPercent, setDiscountPercent] = useState(0);
 
   useEffect(() => {
     if (!cafeId) return;
@@ -43,14 +44,36 @@ export default function Billing() {
     return () => unsubscribe();
   }, [cafeId]);
 
+  const openPaymentModal = (order) => {
+    setSelectedOrder(order);
+    setDiscountPercent(0);
+  };
+
+  // Chegirma qo'llangandan keyingi yakuniy summani hisoblaydi
+  const getDiscountedTotal = (order, percent) => {
+    const original = Number(order?.totalPrice || 0);
+    const safePercent = Math.min(Math.max(Number(percent) || 0, 0), 100);
+    const discountAmount = Math.round((original * safePercent) / 100);
+    const finalTotal = original - discountAmount;
+    return { original, discountAmount, finalTotal, safePercent };
+  };
+
   const markAsPaid = async (order, method) => {
     try {
+      const { original, discountAmount, finalTotal, safePercent } =
+        getDiscountedTotal(order, discountPercent);
+
       await updateDoc(doc(db, "orders", order.id), {
         paymentStatus: "paid",
         paymentMethod: method,
         paidAt: new Date(),
+        originalPrice: original,
+        discountPercent: safePercent,
+        discountAmount: discountAmount,
+        totalPrice: finalTotal, // yakuniy (chegirmadan keyingi) summa
       });
       setSelectedOrder(null);
+      setDiscountPercent(0);
     } catch (error) {
       console.error("To'lovni belgilashda xatolik:", error);
       alert("Xatolik yuz berdi, qaytadan urinib ko'ring");
@@ -111,6 +134,10 @@ export default function Billing() {
       </div>
     );
   }
+
+  const preview = selectedOrder
+    ? getDiscountedTotal(selectedOrder, discountPercent)
+    : null;
 
   return (
     <div className="flex">
@@ -211,6 +238,14 @@ export default function Billing() {
                   ))}
                 </div>
 
+                {/* Chegirma qo'llangan bo'lsa ko'rsatiladi */}
+                {order.paymentStatus === "paid" && order.discountPercent > 0 && (
+                  <div className="mt-2 flex justify-between text-xs text-red-500">
+                    <span>Chegirma ({order.discountPercent}%)</span>
+                    <span>-{Number(order.discountAmount || 0).toLocaleString()} so'm</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
                   <span className="font-semibold text-gray-800">Jami:</span>
                   <span className="font-bold text-amber-700">
@@ -225,7 +260,7 @@ export default function Billing() {
                   </p>
                 ) : (
                   <button
-                    onClick={() => setSelectedOrder(order)}
+                    onClick={() => openPaymentModal(order)}
                     className="w-full mt-3 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition"
                   >
                     To'lovni qabul qilish
@@ -237,16 +272,50 @@ export default function Billing() {
         )}
 
         {/* To'lov usuli tanlash modali */}
-        {selectedOrder && (
+        {selectedOrder && preview && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-5">
               <h2 className="text-lg font-bold mb-1 text-gray-800">
                 To'lov usulini tanlang
               </h2>
               <p className="text-sm text-gray-500 mb-4">
-                Stol №{selectedOrder.tableNumber} —{" "}
-                {Number(selectedOrder.totalPrice || 0).toLocaleString()} so'm
+                Stol №{selectedOrder.tableNumber}
               </p>
+
+              {/* Chegirma kiritish maydoni */}
+              <div className="mb-4">
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Chegirma (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={discountPercent}
+                  onChange={(e) => setDiscountPercent(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              {/* Summalar ko'rsatilishi */}
+              <div className="bg-gray-50 rounded-lg p-3 mb-4 space-y-1">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Boshlang'ich summa</span>
+                  <span>{preview.original.toLocaleString()} so'm</span>
+                </div>
+                {preview.safePercent > 0 && (
+                  <div className="flex justify-between text-sm text-red-500">
+                    <span>Chegirma ({preview.safePercent}%)</span>
+                    <span>-{preview.discountAmount.toLocaleString()} so'm</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-base font-bold text-amber-700 pt-1 border-t border-gray-200">
+                  <span>To'lanadigan summa</span>
+                  <span>{preview.finalTotal.toLocaleString()} so'm</span>
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={() => markAsPaid(selectedOrder, "cash")}
@@ -262,7 +331,10 @@ export default function Billing() {
                 </button>
               </div>
               <button
-                onClick={() => setSelectedOrder(null)}
+                onClick={() => {
+                  setSelectedOrder(null);
+                  setDiscountPercent(0);
+                }}
                 className="w-full mt-2 border border-gray-300 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition"
               >
                 Bekor qilish

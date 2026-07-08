@@ -74,6 +74,16 @@ export default function TableGrid() {
     );
   };
 
+  // Buyurtma vaqtini "HH:MM" formatida ko'rsatish uchun
+  const formatTime = (date) => {
+    if (!date) return "";
+    const d = date?.toDate ? date.toDate() : new Date(date);
+    return d.toLocaleTimeString("uz-UZ", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleAddTable = async (e) => {
     e.preventDefault();
     if (!newTableNumber) {
@@ -168,6 +178,7 @@ export default function TableGrid() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {tables.map((table) => {
             const status = getTableStatus(table.number);
+            const activeOrder = getActiveOrder(table.number);
             return (
               <button
                 key={table.id}
@@ -188,6 +199,12 @@ export default function TableGrid() {
                 <span className="text-xs mt-1 font-medium">
                   {statusLabels[status]}
                 </span>
+                {/* Buyurtma vaqti - band yoki tayyor bo'lsa ko'rsatiladi */}
+                {activeOrder && (
+                  <span className="text-[10px] mt-0.5 font-semibold opacity-70">
+                    🕐 {formatTime(activeOrder.createdAt)}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -260,6 +277,9 @@ export default function TableGrid() {
               }
               return (
                 <>
+                  <p className="text-xs text-gray-400 mb-2">
+                    🕐 Buyurtma vaqti: {formatTime(order.createdAt)}
+                  </p>
                   <div className="space-y-1 mb-3">
                     {(order.items || []).map((item, idx) => (
                       <div
