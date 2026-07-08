@@ -8,6 +8,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/config.js";
 import Navbar from "../../components/Navbar";
+import "./CafeList.css";
+
 
 export default function CafeList() {
   const [cafes, setCafes] = useState([]);

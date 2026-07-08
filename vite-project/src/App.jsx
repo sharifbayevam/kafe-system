@@ -15,8 +15,8 @@ import ErrorBoundary from "./ErrorBoundary";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from "./components/Sidebar";
+import "./index.css"; 
 
-// Rolga qarab ruxsat berish uchun wrapper komponent
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, role, loading } = useAuth();
 

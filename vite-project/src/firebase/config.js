@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, getAuth, indexedDBLocalPersistence, inMemoryPersistence, browserPopupRedirectResolver } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
@@ -22,6 +22,19 @@ const analytics = getAnalytics(app);
 const secondaryApp = initializeApp(firebaseConfig, "Secondary");
 
 // Eksport qilinadigan obyektlar
-export const auth = getAuth(app);
+// Asosiy auth - odatdagidek diskda saqlanadi (login qilgach sahifa yangilansa ham sessiya qoladi)
+export const auth = initializeAuth(app, {
+  persistence: indexedDBLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver,
+});
+
 export const db = getFirestore(app);
-export const secondaryAuth = getAuth(secondaryApp); // MANA SHU QATOR XATONI TUZATADI!
+
+// MUHIM: secondaryAuth uchun inMemoryPersistence beriladi.
+// Shunda u asosiy auth bilan bir xil storage'ni bo'lishmaydi,
+// va xodim/admin yaratilganda yoki undan signOut qilinganda
+// BigAdmin ning asosiy sessiyasiga hech qanday ta'sir qilmaydi.
+export const secondaryAuth = initializeAuth(secondaryApp, {
+  persistence: inMemoryPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver,
+});

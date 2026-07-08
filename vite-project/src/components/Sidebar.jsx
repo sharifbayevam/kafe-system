@@ -37,9 +37,7 @@ export default function Sidebar() {
 
   return (
     <div 
-      // isExpanded true bo'lsa w-64 (keng), false bo'lsa w-20 (ixcham mini holatda) bo'ladi
-      // hover:w-64 orqali sichqoncha ustiga borganda ham avtomatik silliq kengayadi
-      className={`h-screen bg-[#8B4513] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group fixed md:relative z-50 ${
+      className={`h-screen bg-[#872903] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group fixed md:relative z-50 ${
         isExpanded ? "w-64" : "w-20 hover:w-64"
       }`}
     >
