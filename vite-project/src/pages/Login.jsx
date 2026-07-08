@@ -1,35 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, LogIn } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import { User, Lock, LogIn } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
+import Input from "../components/Input.jsx";
+import Button from "../components/Button.jsx";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase/config.js";
 
-
-
+// App.jsx faylingizdagi aniq boshlang'ich yo'nalishlar (Redirect manzillari)
 const ROLE_ROUTES = {
-  bigadmin: "/bigadmin",
-  admin: "/admin",
-  waiter: "/waiter",
-  chef: "/chef",
-  cashier: "/cashier",
+  bigadmin: "/bigadmin/cafes",
+  admin: "/admin/menu",
+  waiter: "/waiter/tables",
+  chef: "/chef/queue",
+  cashier: "/cashier/billing",
 };
 
 const ERROR_MESSAGES = {
-  "auth/invalid-email": "Email manzili noto'g'ri formatda.",
+  "auth/invalid-email": "Login noto'g'ri formatda.",
   "auth/user-disabled": "Bu hisob bloklangan. Administrator bilan bog'laning.",
   "auth/user-not-found": "Bunday foydalanuvchi topilmadi.",
   "auth/wrong-password": "Parol noto'g'ri.",
-  "auth/invalid-credential": "Email yoki parol noto'g'ri.",
+  "auth/invalid-credential": "Login yoki parol noto'g'ri.",
   "auth/too-many-requests": "Juda ko'p urinish. Birozdan so'ng qayta urining.",
   default: "Kirishda xatolik yuz berdi. Qaytadan urinib ko'ring.",
 };
 
+// Foydalanuvchi kiritgan matnni Firebase kutadigan email formatiga aylantiradi.
+// Agar u allaqachon email bo'lsa (masalan bigadmin@gmail.com), o'zgartirmasdan qoldiradi.
+// Agar oddiy login bo'lsa (masalan "ali123"), avtomatik "@kafe.com" qo'shadi.
+function toFirebaseEmail(rawInput) {
+  const trimmed = rawInput.trim().toLowerCase();
+  if (trimmed.includes("@")) return trimmed;
+  return `${trimmed}@kafe.com`;
+}
+
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, setAuthData } = useAuth(); // setAuthData context'da holatni qo'lda yangilash uchun (agar mavjud bo'lsa)
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -37,8 +47,7 @@ export default function Login() {
 
   function validate() {
     const next = {};
-    if (!email.trim()) next.email = "Email kiritilishi shart";
-    else if (!/^\S+@\S+\.\S+$/.test(email)) next.email = "Email formati noto'g'ri";
+    if (!username.trim()) next.username = "Login kiritilishi shart";
     if (!password) next.password = "Parol kiritilishi shart";
     else if (password.length < 6) next.password = "Parol kamida 6 ta belgidan iborat bo'lishi kerak";
     setErrors(next);
@@ -51,13 +60,48 @@ export default function Login() {
     if (!validate()) return;
 
     setSubmitting(true);
+    const loginEmail = toFirebaseEmail(username);
+
     try {
-      const loggedInRole = await login(email.trim(), password);
+      // 1. Birinchi bo'lib Firebase Auth (BigAdmin / Admin) orqali kirishga urinib ko'radi
+      const loggedInRole = await login(loginEmail, password);
       const target = ROLE_ROUTES[loggedInRole] || "/";
       navigate(target, { replace: true });
     } catch (err) {
-      const code = err?.code || "default";
-      setFormError(ERROR_MESSAGES[code] || ERROR_MESSAGES.default);
+      // 2. Agar Firebase Auth'da xatolik bersa (masalan, ishchi kiritilgan bo'lsa), Firestore'dan qidiradi
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", loginEmail),
+          where("password", "==", password) // Admin xodimlar ro'yxatida bergan oddiy parol
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const staffUser = querySnapshot.docs[0].data();
+          const staffRole = staffUser.role;
+
+          // Context ichidagi user ma'lumotlarini yangilash funksiyasi (Agar AuthContext'da yozilgan bo'lsa)
+          if (typeof setAuthData === "function") {
+            setAuthData({
+              user: staffUser,
+              role: staffRole,
+              cafeId: staffUser.cafeId
+            });
+          }
+
+          const target = ROLE_ROUTES[staffRole] || "/";
+          navigate(target, { replace: true });
+        } else {
+          // Agar Firestore'da ham topilmasa, asosiy Firebase xatoligini ko'rsatadi
+          const code = err?.code || "default";
+          setFormError(ERROR_MESSAGES[code] || ERROR_MESSAGES.default);
+        }
+      } catch (firestoreErr) {
+        console.error("Firestore'dan xodimlarni tekshirishda xatolik:", firestoreErr);
+        setFormError("Tizimga kirishda ichki xatolik yuz berdi.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -81,9 +125,9 @@ export default function Login() {
             <LogIn size={26} className="text-white relative" />
           </div>
           <h1 className="disp text-2xl font-extrabold text-[#241F19] tracking-tight">
-            Tizimga kirish
+            Chaihana Nazorat
           </h1>
-          <p className="text-sm text-[#8E8676] mt-1">Tizimga kirish uchun ma'lumotlaringizni kiriting</p>
+          <p className="text-sm text-[#8E8676] mt-1">Tizimga kirish uchun login va parolingizni kiriting</p>
         </div>
 
         {/* Forma */}
@@ -99,13 +143,13 @@ export default function Login() {
           )}
 
           <Input
-            label="Email"
-            type="email"
-            icon={<Mail />}
-            placeholder=""
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={errors.email}
+            label="Login"
+            type="text"
+            icon={<User />}
+            placeholder="loginingizni kiriting"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={errors.username}
             autoComplete="username"
             required
           />
