@@ -32,22 +32,23 @@ function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  const isAdmin = role === "admin";
-
-
-return (
-  <>
-    <Navbar />
-    <div className="flex">
-      {(role === "admin" || role === "waiter") && <Sidebar />}
-      <div className="flex-1 p-4 bg-[#FDFBF7]">
-        {children}
+  return (
+    <>
+      {/* BU YERDAGI <Navbar /> O'CHIRILDI! 
+        Chunki sahifalaringiz ichida allaqachon Navbar chaqirilgan.
+      */}
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          {(role === "admin" || role === "waiter") && <Sidebar />}
+          <div className="flex-1 p-4 bg-[#FDFBF7]">
+            {children}
+          </div>
+        </div>
       </div>
-    </div>
-    {/* Xabarnomalar oynasi */}
-    <ToastContainer position="top-right" autoClose={4000} theme="colored" />
-  </>
-);
+      {/* Xabarnomalar oynasi */}
+      <ToastContainer position="top-right" autoClose={4000} theme="colored" />
+    </>
+  );
 }
 
 // Foydalanuvchi rolga qarab bosh sahifaga yo'naltiriladi
