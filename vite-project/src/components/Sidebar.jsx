@@ -1,43 +1,73 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { 
-  LayoutDashboard, 
-  UtensilsCrossed, 
-  Users, 
-  PlusCircle, 
-  ClipboardList, 
+import {
+  LayoutDashboard,
+  UtensilsCrossed,
+  Users,
+  PlusCircle,
+  ClipboardList,
   LogOut,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Wallet,
+  ChefHat,
+  Building2,
 } from "lucide-react";
 
 export default function Sidebar() {
   const { role, logout } = useAuth();
   const location = useLocation();
-  
+
   // Sidebar qo'lda butunlay ochilgan yoki yopilganligini nazorat qilish uchun state
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Admin uchun menyu linklari
+  // Har bir rol uchun menyu linklari
+  const bigadminLinks = [
+    { path: "/bigadmin/cafes", label: "Kafelar", icon: Building2 },
+  ];
+
   const adminLinks = [
-    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin/analytics", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/menu", label: "Menyu boshqaruvi", icon: UtensilsCrossed },
     { path: "/admin/staff", label: "Xodimlar", icon: Users },
   ];
 
-  // Ofitsiant uchun menyu linklari
   const waiterLinks = [
+    { path: "/waiter/tables", label: "Stollar", icon: LayoutDashboard },
     { path: "/waiter/order", label: "Yangi buyurtma", icon: PlusCircle },
-    { path: "/waiter/history", label: "Buyurtmalar", icon: ClipboardList },
   ];
 
-  const menuLinks = role === "admin" ? adminLinks : role === "waiter" ? waiterLinks : [];
+  const chefLinks = [
+    { path: "/chef/queue", label: "Buyurtmalar navbati", icon: ChefHat },
+  ];
+
+  const cashierLinks = [
+    { path: "/cashier/billing", label: "Kassa", icon: Wallet },
+  ];
+
+  const linksByRole = {
+    bigadmin: bigadminLinks,
+    admin: adminLinks,
+    waiter: waiterLinks,
+    chef: chefLinks,
+    cashier: cashierLinks,
+  };
+
+  const roleLabels = {
+    bigadmin: "Bosh admin",
+    admin: "Admin",
+    waiter: "Ofitsiant",
+    chef: "Oshpaz",
+    cashier: "Kassir",
+  };
+
+  const menuLinks = linksByRole[role] || [];
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div 
-      className={`h-screen bg-[#872903] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group fixed md:relative z-50 ${
+    <div
+      className={`h-screen bg-[#872903] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group sticky top-0 z-50 ${
         isExpanded ? "w-64" : "w-20 hover:w-64"
       }`}
     >
@@ -52,9 +82,8 @@ export default function Sidebar() {
               DASTURXON
             </span>
           </div>
-          
-          {/* Qo'shimcha: Istasa bosib qotirib qo'yadigan kichkina o'q tugmasi */}
-          <button 
+
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`hidden md:flex p-1 rounded-lg bg-black/20 text-[#D4AF37] hover:bg-black/40 transition-all ${
               !isExpanded ? "opacity-0 group-hover:opacity-100" : ""
@@ -72,7 +101,9 @@ export default function Sidebar() {
           <div className={`transition-opacity duration-200 whitespace-nowrap ${
             isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}>
-            <p className="text-[11px] text-amber-200/80 font-bold capitalize">{role === "waiter" ? "Ofitsiant" : "Admin"}</p>
+            <p className="text-[11px] text-amber-200/80 font-bold capitalize">
+              {roleLabels[role] || "Foydalanuvchi"}
+            </p>
             <p className="text-[10px] text-white/50">Onlayn</p>
           </div>
         </div>
@@ -91,17 +122,14 @@ export default function Sidebar() {
                     : "text-amber-100/80 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                {/* Ikonka har doim markazda chiroyli turadi */}
                 <Icon className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover/link:scale-110" />
-                
-                {/* Yozuv faqat sidebar ochilganda yoki sichqoncha borganda ko'rinadi */}
+
                 <span className={`transition-opacity duration-200 whitespace-nowrap ${
                   isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 }`}>
                   {link.label}
                 </span>
 
-                {/* Kichkina tooltip: Sichqoncha borganda yozuv yonboshidan ham chiqib turishi uchun (ixtiyoriy go'zallik) */}
                 {!isExpanded && (
                   <div className="absolute left-20 bg-[#8B4513] text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 pointer-events-none group-hover/link:opacity-100 transition-opacity duration-150 border border-white/10 whitespace-nowrap z-50">
                     {link.label}
@@ -113,7 +141,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Chiqish tugmasi */}
+      {/* Chiqish tugmasi - barcha rollar uchun ishlaydi */}
       <button
         onClick={logout}
         className="flex items-center gap-4 px-3 py-3 text-red-200 hover:bg-red-950/40 hover:text-red-400 rounded-xl text-xs font-bold transition-all w-full overflow-hidden"
