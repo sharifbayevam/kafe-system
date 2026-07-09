@@ -67,7 +67,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`h-screen bg-[#872903] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group sticky top-0 z-50 ${
+      className={`h-screen bg-[#014643] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group sticky top-0 z-50 ${
         isExpanded ? "w-64" : "w-20 hover:w-64"
       }`}
     >
@@ -131,7 +131,7 @@ export default function Sidebar() {
                 </span>
 
                 {!isExpanded && (
-                  <div className="absolute left-20 bg-[#8B4513] text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 pointer-events-none group-hover/link:opacity-100 transition-opacity duration-150 border border-white/10 whitespace-nowrap z-50">
+                  <div className="absolute left-20 bg-[#8B45] text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 pointer-events-none group-hover/link:opacity-100 transition-opacity duration-150 border border-white/10 whitespace-nowrap z-50">
                     {link.label}
                   </div>
                 )}

@@ -124,6 +124,18 @@ export default function TableGrid() {
     }
   };
 
+  // MUHIM: Stol bosilganda ishlaydigan funksiya
+  // - Bo'sh stol bo'lsa -> shu stol raqami bilan to'g'ridan-to'g'ri menyu (OrderForm) sahifasiga o'tadi
+  // - Band yoki tayyor stol bo'lsa -> avvalgidek buyurtma tafsilotlari modali ochiladi
+  const handleTableClick = (table) => {
+    const status = getTableStatus(table.number);
+    if (status === "empty") {
+      navigate(`/waiter/order?table=${table.number}`);
+    } else {
+      setSelectedTable(table);
+    }
+  };
+
   const statusStyles = {
     empty: "bg-white border-gray-200 text-gray-700",
     occupied: "bg-amber-50 border-amber-400 text-amber-800",
@@ -160,7 +172,7 @@ export default function TableGrid() {
       <div className="flex gap-4 mb-4 text-xs text-gray-500 flex-wrap">
         <div className="flex items-center gap-1">
           <span className="w-3 h-3 rounded-full bg-white border border-gray-300 inline-block"></span>
-          Bo'sh
+          Bo'sh (bosilsa menyuga o'tadi)
         </div>
         <div className="flex items-center gap-1">
           <span className="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
@@ -172,52 +184,49 @@ export default function TableGrid() {
         </div>
       </div>
 
-      {tables.length === 0 ? (
-        <p className="text-gray-400 text-sm">Hozircha stollar qo'shilmagan</p>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {tables.map((table) => {
-            const status = getTableStatus(table.number);
-            const activeOrder = getActiveOrder(table.number);
-            return (
-              <button
-                key={table.id}
-                onClick={() => {
-                  if (status !== "empty") {
-                    setSelectedTable(table);
-                  }
-                }}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  handleDeleteTable(table.id);
-                }}
-                className={`relative rounded-xl border-2 p-4 flex flex-col items-center justify-center h-24 transition ${statusStyles[status]} ${
-                  status === "ready" ? "animate-pulse" : ""
-                }`}
-              >
-                <span className="text-lg font-bold">№{table.number}</span>
-                <span className="text-xs mt-1 font-medium">
-                  {statusLabels[status]}
-                </span>
-                {/* Buyurtma vaqti - band yoki tayyor bo'lsa ko'rsatiladi */}
-                {activeOrder && (
-                  <span className="text-[10px] mt-0.5 font-semibold opacity-70">
-                    🕐 {formatTime(activeOrder.createdAt)}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-
-          <button
-            onClick={() => setModalOpen(true)}
-            className="rounded-xl border-2 border-dashed border-gray-300 p-4 flex flex-col items-center justify-center h-24 text-gray-400 hover:bg-gray-50 transition"
-          >
-            <span className="text-2xl">+</span>
-            <span className="text-xs mt-1">Stol qo'shish</span>
-          </button>
-        </div>
+      {tables.length === 0 && (
+        <p className="text-gray-400 text-sm mb-3">Hozircha stollar qo'shilmagan</p>
       )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {tables.map((table) => {
+          const status = getTableStatus(table.number);
+          const activeOrder = getActiveOrder(table.number);
+          return (
+            <button
+              key={table.id}
+              onClick={() => handleTableClick(table)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                handleDeleteTable(table.id);
+              }}
+              className={`relative rounded-xl border-2 p-4 flex flex-col items-center justify-center h-24 transition ${statusStyles[status]} ${
+                status === "ready" ? "animate-pulse" : ""
+              }`}
+            >
+              <span className="text-lg font-bold">№{table.number}</span>
+              <span className="text-xs mt-1 font-medium">
+                {statusLabels[status]}
+              </span>
+              {/* Buyurtma vaqti - band yoki tayyor bo'lsa ko'rsatiladi */}
+              {activeOrder && (
+                <span className="text-[10px] mt-0.5 font-semibold opacity-70">
+                  🕐 {formatTime(activeOrder.createdAt)}
+                </span>
+              )}
+            </button>
+          );
+        })}
+
+        {/* Stol qo'shish tugmasi - stollar bo'lsa ham, bo'lmasa ham har doim ko'rinadi */}
+        <button
+          onClick={() => setModalOpen(true)}
+          className="rounded-xl border-2 border-dashed border-gray-300 p-4 flex flex-col items-center justify-center h-24 text-gray-400 hover:bg-gray-50 hover:border-amber-400 hover:text-amber-600 transition"
+        >
+          <span className="text-2xl">+</span>
+          <span className="text-xs mt-1">Stol qo'shish</span>
+        </button>
+      </div>
 
       {/* Yangi stol qo'shish modali */}
       {modalOpen && (
@@ -313,14 +322,25 @@ export default function TableGrid() {
                       : "Tayyorlanmoqda"}
                   </span>
 
-                  {order.kitchenStatus === "ready" && (
+                  <div className="flex gap-2 mb-2">
+                    {/* Stolga yana taom qo'shish uchun to'g'ridan-to'g'ri menyuga o'tish */}
                     <button
-                      onClick={() => markOrderDelivered(order)}
-                      className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition mb-2"
+                      onClick={() =>
+                        navigate(`/waiter/order?table=${selectedTable.number}`)
+                      }
+                      className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition"
                     >
-                      Mijozga yetkazildi
+                      Taom qo'shish
                     </button>
-                  )}
+                    {order.kitchenStatus === "ready" && (
+                      <button
+                        onClick={() => markOrderDelivered(order)}
+                        className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
+                      >
+                        Yetkazildi
+                      </button>
+                    )}
+                  </div>
                 </>
               );
             })()}

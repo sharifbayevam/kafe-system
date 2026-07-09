@@ -6,6 +6,7 @@ import {
   onSnapshot,
   addDoc,
 } from "firebase/firestore";
+import { useSearchParams } from "react-router-dom";
 
 import { db } from "../../firebase/config.js";
 import { useAuth } from "../../context/AuthContext";
@@ -14,6 +15,7 @@ import "./OrderForm.css";
 
 export default function OrderForm() {
   const { cafeId } = useAuth();
+  const [searchParams] = useSearchParams();
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -22,6 +24,15 @@ export default function OrderForm() {
   const [category, setCategory] = useState("all");
   const [submitting, setSubmitting] = useState(false);
   const [showCart, setShowCart] = useState(false);
+
+  // Stol grid'idan "?table=5" kabi manzil bilan kelinsa,
+  // stol raqami maydonini avtomatik to'ldiradi
+  useEffect(() => {
+    const tableFromUrl = searchParams.get("table");
+    if (tableFromUrl) {
+      setTableNumber(tableFromUrl);
+    }
+  }, [searchParams]);
 
   // 1. Menyu taomlarini real-time yuklash
   useEffect(() => {
@@ -59,7 +70,7 @@ export default function OrderForm() {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "modified" || change.type === "added") {
           const orderData = change.doc.data();
-          
+
           // Ekran chetida bildirishnoma chiqarish
           toast.success(`🛎️ ${orderData.tableNumber}-stol buyurtmasi tayyor! Oshpazdan olib ketishingiz mumkin.`, {
             style: { backgroundColor: '#8B4513', color: '#FFF' },
@@ -213,7 +224,7 @@ export default function OrderForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredMenu.map((dish, index) => {
             const qty = getQuantityInCart(dish.id);
-            
+
             // Toq va juft indekslar uchun chap/o'ng klasslar
             const animationClass = index % 2 === 0 ? "animate-fade-left" : "animate-fade-right";
 
