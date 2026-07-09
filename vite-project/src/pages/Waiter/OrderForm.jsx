@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   collection,
   query,
@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { db } from "../../firebase/config.js";
 import { useAuth } from "../../context/AuthContext";
-import { toast } from "react-toastify"; // Xabarnomalar uchun qo'shildi
+import { toast } from "react-toastify";
 import "./OrderForm.css";
 
 export default function OrderForm() {
@@ -25,8 +25,81 @@ export default function OrderForm() {
   const [submitting, setSubmitting] = useState(false);
   const [showCart, setShowCart] = useState(false);
 
-  // Stol grid'idan "?table=5" kabi manzil bilan kelinsa,
-  // stol raqami maydonini avtomatik to'ldiradi
+  // Audio oqimni brauzer bloklamasligi uchun ref va holat
+  const audioCtxRef = useRef(null);
+
+  // Internetdan havola yuklamasdan toza SMS/Bildirishnoma ovozi generatsiyasi
+  const playCleanSmsSound = async () => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtxRef.current = new AudioContext();
+        }
+      }
+
+      const ctx = audioCtxRef.current;
+      if (!ctx) return;
+
+      if (ctx.state === "suspended") {
+        await ctx.resume();
+      }
+
+      const now = ctx.currentTime;
+
+      // 1-tovush (Qisqa boshlang'ich signal)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(650, now);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+
+      // 2-tovush (SMS effekti beruvchi ikkinchi signal)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(950, now + 0.06);
+      gain2.gain.setValueAtTime(0, now);
+      gain2.gain.setValueAtTime(0.12, now + 0.06);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.08);
+
+      osc2.start(now + 0.06);
+      osc2.stop(now + 0.25);
+    } catch (e) {
+      console.log("OrderForm ichida ovoz xatoligi:", e);
+    }
+  };
+
+  // Ofitsiant ixtiyoriy joyga klik qilganda audio oqimni tayyorlab qo'yish
+  useEffect(() => {
+    const initAudio = () => {
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtxRef.current = new AudioContext();
+        }
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+    };
+    window.addEventListener("click", initAudio);
+    window.addEventListener("touchstart", initAudio);
+    return () => {
+      window.removeEventListener("click", initAudio);
+      window.removeEventListener("touchstart", initAudio);
+    };
+  }, []);
+
+  // Stol grid'idan "?table=5" kabi manzil bilan kelinsa stolni to'ldirish
   useEffect(() => {
     const tableFromUrl = searchParams.get("table");
     if (tableFromUrl) {
@@ -56,14 +129,14 @@ export default function OrderForm() {
     return () => unsubscribe();
   }, [cafeId]);
 
-  // 2. Real-time xabarnomalar: Oshpaz taomni tayyor qilsa, ofitsiantga bildirishnoma yuborish
+  // 2. Real-time xabarnomalar: Oshpaz 'ready' qilganda ishlovchi qism
   useEffect(() => {
     if (!cafeId) return;
 
     const q = query(
       collection(db, "orders"),
       where("cafeId", "==", cafeId),
-      where("kitchenStatus", "==", "ready") // Oshpaz 'ready' qilgan buyurtmalar
+      where("kitchenStatus", "==", "ready")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -71,15 +144,14 @@ export default function OrderForm() {
         if (change.type === "modified" || change.type === "added") {
           const orderData = change.doc.data();
 
-          // Ekran chetida bildirishnoma chiqarish
+          // Toast xabarnomasi
           toast.success(`🛎️ ${orderData.tableNumber}-stol buyurtmasi tayyor! Oshpazdan olib ketishingiz mumkin.`, {
             style: { backgroundColor: '#8B4513', color: '#FFF' },
             icon: "🍲"
           });
 
-          // Qisqa ovozli signal (Ding)
-          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav");
-          audio.play().catch((e) => console.log("Ovoz ijro etish ruxsatnomasi yo'q: ", e));
+          // Eski buzilgan audio o'rniga yangi xavfsiz funksiya chaqiriladi
+          playCleanSmsSound();
         }
       });
     });
@@ -217,15 +289,13 @@ export default function OrderForm() {
         ))}
       </div>
 
-      {/* Menyu ro'yxati (Ikki tomondan kirib keladigan animatsiya bilan) */}
+      {/* Menyu ro'yxati */}
       {filteredMenu.length === 0 ? (
         <p className="text-gray-400 text-sm">Taomlar topilmadi</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredMenu.map((dish, index) => {
             const qty = getQuantityInCart(dish.id);
-
-            // Toq va juft indekslar uchun chap/o'ng klasslar
             const animationClass = index % 2 === 0 ? "animate-fade-left" : "animate-fade-right";
 
             return (
@@ -234,7 +304,7 @@ export default function OrderForm() {
                 className={`bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex ${animationClass}`}
                 style={{
                   animationDelay: `${index * 0.06}s`,
-                  opacity: 0, // Animatsiya boshlanguncha element yashirin turadi
+                  opacity: 0,
                 }}
               >
                 <img
@@ -288,7 +358,7 @@ export default function OrderForm() {
         </div>
       )}
 
-      {/* Savat tugmasi (pastda qat'iy joylashgan) */}
+      {/* Savat tugmasi */}
       {cart.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-40">
           <button
@@ -366,7 +436,7 @@ export default function OrderForm() {
                 disabled={submitting}
                 className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition disabled:opacity-50"
               >
-                {submitting ? "Yuborilmoqda..." : "Buyurtmani yuborish"}
+                {submitting ? "Yuborilmoqda..." : "Buyurtma yuborish"}
               </button>
               <button
                 onClick={() => setShowCart(false)}
