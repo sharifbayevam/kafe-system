@@ -127,3 +127,49 @@ code {
 .animate-fade-right {
   animation: slideFromRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==========================================================================
+   MOBIL QURILMALAR UCHUN IXCHAM OQ XABARNOMALAR (TOASTS) SOZLAMASI
+   ========================================================================== */
+
+/* Ekran kengligi 768px dan kichik bo'lganda (telefonlar uchun) */
+@media (max-width: 768px) {
+  /* Agar react-toastify yoki shunga o'xshash div role="alert" ishlatilgan bo'lsa */
+  div[role="alert"],
+  .Toastify__toast,
+  .notification-toast {
+    background-color: #ffffff !important; /* To'q yashil/jigarrang o'rniga toza oq fon */
+    color: #1e293b !important;            /* Matn rangi to'q kulrang */
+    border: 1px solid #e2e8f0 !important; /* Chiroyli yupqa chegara */
+    max-width: 260px !important;          /* Eni kichraytirildi, ekranni qoplamaydi */
+    padding: 6px 10px !important;         /* Ichki masofalar qisqartirildi */
+    font-size: 11px !important;           /* Shrift o'lchami kichikroq */
+    border-radius: 10px !important;        /* Burchaklari yumshoq */
+    margin: 4px auto 4px right !important;/* Bir-biriga yopishib qolmaydi */
+    box-shadow: var(--shadow) !important; /* Root-dagi tayyor shadow effekti */
+  }
+
+  /* Xabarnoma ichidagi ikonka va sarlavhalar rangi */
+  div[role="alert"] p,
+  div[role="alert"] span,
+  .Toastify__toast-body {
+    color: #1e293b !important;
+    font-weight: 500 !important;
+  }
+
+  /* Bildirishnomani yopish (X) tugmasini kichraytirish */
+  div[role="alert"] button,
+  .Toastify__close-button {
+    color: #94a3b8 !important;            /* Oq "X" o'rniga och kulrang */
+    font-size: 10px !important;
+    opacity: 0.7;
+  }
+  
+  /* Xabarnomalar konteynerini o'ng tomonga ixcham joylashtirish */
+  .Toastify__toast-container {
+    width: auto !important;
+    max-width: 280px !important;
+    right: 8px !important;
+    top: 8px !important;
+  }
+}

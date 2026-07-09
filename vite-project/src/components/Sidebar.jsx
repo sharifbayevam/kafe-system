@@ -1,158 +1,159 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
-import {
-  LayoutDashboard,
-  UtensilsCrossed,
-  Users,
-  PlusCircle,
-  ClipboardList,
-  LogOut,
-  ChevronRight,
-  ChevronLeft,
-  Wallet,
-  ChefHat,
-  Building2,
-} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation } from "react-router-dom";
+
+const languages = [
+  { code: "uz-latin", label: "UZ" },
+  { code: "ru", label: "RU" }
+];
 
 export default function Sidebar() {
-  const { role, logout } = useAuth();
+  const { i18n, t } = useTranslation();
+  const { logout } = useAuth();
+  const [langOpen, setLangOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // Tasdiqlash modali uchun holat
+  const langRef = useRef(null);
   const location = useLocation();
 
-  // Sidebar qo'lda butunlay ochilgan yoki yopilganligini nazorat qilish uchun state
-  const [isExpanded, setIsExpanded] = useState(false);
+  const currentLang = i18n.language || localStorage.getItem("appLang") || "uz-latin";
 
-  // Har bir rol uchun menyu linklari
-  const bigadminLinks = [
-    { path: "/bigadmin/cafes", label: "Kafelar", icon: Building2 },
-  ];
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (langRef.current && !langRef.current.contains(event.target)) {
+        setLangOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const adminLinks = [
-    { path: "/admin/analytics", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/admin/menu", label: "Menyu boshqaruvi", icon: UtensilsCrossed },
-    { path: "/admin/staff", label: "Xodimlar", icon: Users },
-  ];
-
-  const waiterLinks = [
-    { path: "/waiter/tables", label: "Stollar", icon: LayoutDashboard },
-    { path: "/waiter/order", label: "Yangi buyurtma", icon: PlusCircle },
-  ];
-
-  const chefLinks = [
-    { path: "/chef/queue", label: "Buyurtmalar navbati", icon: ChefHat },
-  ];
-
-  const cashierLinks = [
-    { path: "/cashier/billing", label: "Kassa", icon: Wallet },
-  ];
-
-  const linksByRole = {
-    bigadmin: bigadminLinks,
-    admin: adminLinks,
-    waiter: waiterLinks,
-    chef: chefLinks,
-    cashier: cashierLinks,
+  const handleLangChange = (code) => {
+    localStorage.setItem("appLang", code);
+    i18n.changeLanguage(code);
+    setLangOpen(false);
+    window.location.reload();
   };
 
-  const roleLabels = {
-    bigadmin: "Bosh admin",
-    admin: "Admin",
-    waiter: "Ofitsiant",
-    chef: "Oshpaz",
-    cashier: "Kassir",
+  // Chiqishni tasdiqlash funksiyasi
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    logout();
   };
-
-  const menuLinks = linksByRole[role] || [];
-  const isActive = (path) => location.pathname === path;
 
   return (
-    <div
-      className={`h-screen bg-[#014643] text-white flex flex-col justify-between p-4 shadow-xl shrink-0 transition-all duration-300 ease-in-out group sticky top-0 z-50 ${
-        isExpanded ? "w-64" : "w-20 hover:w-64"
-      }`}
-    >
-      <div>
-        {/* Yuqori qism: Logotip va Ochish/Yopish tugmasi */}
-        <div className="flex items-center justify-between border-b border-[#D4AF37]/20 py-4 mb-6 overflow-hidden">
-          <div className="flex items-center gap-3 px-2">
-            <UtensilsCrossed className="text-[#D4AF37] w-6 h-6 shrink-0" />
-            <span className={`font-black text-sm tracking-wider text-[#FDFBF7] transition-opacity duration-200 whitespace-nowrap ${
-              isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}>
-              DASTURXON
-            </span>
-          </div>
+    <>
+      {/* PASTKI GORIZONTAL MOBIL MENYU */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#073024] text-white h-16 border-t border-emerald-950 z-40 flex items-center justify-around px-2 select-none">
+        
+        {/* 1. STOLLAR */}
+        <Link
+          to="/waiter/tables"
+          className={`flex flex-col items-center justify-center w-20 h-full transition-all ${
+            location.pathname.includes("tables")
+              ? "text-amber-400 font-bold scale-105"
+              : "text-emerald-100/60"
+          }`}
+        >
+          <span className="text-xl">㗊</span>
+          <span className="text-[10px] mt-0.5 truncate max-w-full">
+            {t("tables_title") || "Stollar"}
+          </span>
+        </Link>
 
+        {/* 2. YANGI BUYURTMA */}
+        <Link
+          to="/waiter/order"
+          className={`flex flex-col items-center justify-center w-20 h-full transition-all ${
+            location.pathname.includes("order")
+              ? "text-amber-400 font-bold scale-105"
+              : "text-emerald-100/60"
+          }`}
+        >
+          <span className="text-xl">➕</span>
+          <span className="text-[10px] mt-0.5 truncate max-w-full">
+            {t("new_order_title") || "Yangi buyurtma"}
+          </span>
+        </Link>
+
+        {/* 3. TIL TANLASH (TEPAGA QARAB OCHILADI) */}
+        <div className="relative flex flex-col items-center justify-center w-20 h-full" ref={langRef}>
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={`hidden md:flex p-1 rounded-lg bg-black/20 text-[#D4AF37] hover:bg-black/40 transition-all ${
-              !isExpanded ? "opacity-0 group-hover:opacity-100" : ""
+            onClick={() => setLangOpen(!langOpen)}
+            className={`flex flex-col items-center justify-center w-full h-full text-emerald-100/60 transition-all ${
+              langOpen ? "text-white" : ""
             }`}
           >
-            {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            <span className="text-xl">🌐</span>
+            <span className="text-[10px] mt-0.5 uppercase font-bold">
+              {languages.find((l) => l.code === currentLang)?.label || "UZ"}
+            </span>
           </button>
+
+          {langOpen && (
+            <div className="absolute bottom-16 bg-[#073024] rounded-t-xl shadow-2xl border border-emerald-950 p-1 min-w-[70px] flex flex-col gap-1 z-50">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLangChange(lang.code)}
+                  className={`px-3 py-2 text-xs rounded-lg text-center font-medium transition-colors ${
+                    currentLang === lang.code
+                      ? "text-amber-400 font-bold bg-emerald-900/40"
+                      : "text-emerald-200 hover:bg-emerald-900/20"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Kichkina Profil qismi */}
-        <div className="flex items-center gap-3 px-2 py-2 bg-black/10 rounded-xl mb-6 border border-white/5 overflow-hidden">
-          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-[#8B4513] font-black text-xs shrink-0 uppercase">
-            {role ? role[0] : "U"}
-          </div>
-          <div className={`transition-opacity duration-200 whitespace-nowrap ${
-            isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          }`}>
-            <p className="text-[11px] text-amber-200/80 font-bold capitalize">
-              {roleLabels[role] || "Foydalanuvchi"}
-            </p>
-            <p className="text-[10px] text-white/50">Onlayn</p>
-          </div>
-        </div>
+        {/* 4. TIZIMDAN CHIQISH (MODALNI OCHADI) */}
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="flex flex-col items-center justify-center w-20 h-full text-emerald-100/60 hover:text-rose-400 transition-all cursor-pointer"
+        >
+          <span className="text-xl">↳</span>
+          <span className="text-[10px] mt-0.5 truncate max-w-full">
+            {t("close_window") || "Oynani yopish"}
+          </span>
+        </button>
 
-        {/* Menyu Navigatsiyasi */}
-        <nav className="space-y-2">
-          {menuLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-bold transition-all relative group/link ${
-                  isActive(link.path)
-                    ? "bg-[#D4AF37] text-[#8B4513] shadow-md"
-                    : "text-amber-100/80 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover/link:scale-110" />
-
-                <span className={`transition-opacity duration-200 whitespace-nowrap ${
-                  isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}>
-                  {link.label}
-                </span>
-
-                {!isExpanded && (
-                  <div className="absolute left-20 bg-[#8B45] text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 pointer-events-none group-hover/link:opacity-100 transition-opacity duration-150 border border-white/10 whitespace-nowrap z-50">
-                    {link.label}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
       </div>
 
-      {/* Chiqish tugmasi - barcha rollar uchun ishlaydi */}
-      <button
-        onClick={logout}
-        className="flex items-center gap-4 px-3 py-3 text-red-200 hover:bg-red-950/40 hover:text-red-400 rounded-xl text-xs font-bold transition-all w-full overflow-hidden"
-      >
-        <LogOut className="w-5 h-5 shrink-0 text-red-300" />
-        <span className={`transition-opacity duration-200 whitespace-nowrap ${
-          isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-        }`}>
-          Tizimdan chiqish
-        </span>
-      </button>
-    </div>
+      {/* TIZIMDAN CHIQISHNI TASDIQLASH MODALI */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-xs shadow-2xl text-center transform transition-all scale-100">
+            <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-rose-500 text-xl">🚪</span>
+            </div>
+            
+            <h3 className="text-gray-800 font-bold text-base mb-1">
+              Tizimdan chiqish
+            </h3>
+            <p className="text-gray-500 text-xs mb-5">
+              Haqiqatan ham profilingizdan chiqmoqchimisz?
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleConfirmLogout}
+                className="flex-1 bg-rose-600 text-white py-2 rounded-xl text-xs font-semibold hover:bg-rose-700 transition active:scale-95"
+              >
+                Ha, chiqish
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl text-xs font-semibold hover:bg-gray-200 transition active:scale-95"
+              >
+                Yo'q, qolish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
