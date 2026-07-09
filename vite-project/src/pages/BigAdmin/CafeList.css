@@ -1,80 +1,81 @@
-/* CafeList.css */
+.cafe-qoshish{
+  background: linear-gradient(#f59c7b, #832b0c, #ff4603);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  font-family: initial;
+  }
+  .cafe-qoshish:hover {
+  background-color: #f44708;
+  transform: scale(1.1);
+  font-family: initial;
+  }
+  .divlar{
+  background: linear-gradient(#aecef9d3, #c5e0fb, #bcd8fe);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 18px;
+  font-weight: 500; 
+  transition: background-color 0.3s ease;
+  font-family: initial;
+  animation: alternate;
+  box-shadow: 0 4px 6px rgba(0, 48, 119, 0.3);
+  margin: 29px 0;
+  }
+  .divlar:hover {
+  background-color: #1a77fa;  
+  transform: scale(1.02);
+  font-family: initial;
+  }
+  .input{
+    background-color: rgba(0, 48, 119, 0.2);
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #020c53;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
-.cafe-container {
-  max-width: 900px !important;
-  margin: 0 auto !important;
-  padding: 24px 16px !important;
-  font-family: system-ui, -apple-system, sans-serif !important;
-}
 
-.cafe-container .cafe-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
+  }
+  .inputs{
+    background-color: rgba(60, 135, 247, 0.4);
+  width: 100%;
+  margin-top: 0.25rem;  
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+    box-shadow: 0 4px 6px rgba(0, 48, 119, 0.3);
+  border-radius: 10px;
+  font-size: 14px;  
+  text-emphasis-color: initial;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  color: black;
+  }
+  .inputs:hover {
+    border-color: #1a77fa;
+    box-shadow: 0 4px 6px rgba(0, 48, 119, 0.3);
+    color: #1a77fa;
+  }
 
-.cafe-container .cafe-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-}
-
-.cafe-container .btn-add-cafe {
-  background-color: #d97706 !important; /* To'q sariq/Amber rang */
-  color: #ffffff !important;
-  padding: 10px 18px !important;
-  border-radius: 10px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  border: none !important;
-  cursor: pointer;
-}
-
-/* Statistika paneli */
-.cafe-container .stats-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important; /* Xato tuzatildi */
-  gap: 12px !important;
-  margin-bottom: 24px !important;
-}
-
-.cafe-container .stat-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding: 14px !important;
-  text-align: center !important;
-}
-
-/* Filter tugmalari */
-.cafe-container .filter-bar {
-  display: flex !important;
-  gap: 8px !important;
-  margin-bottom: 20px !important;
-}
-
-.cafe-container .filter-btn {
-  padding: 8px 16px !important;
-  border-radius: 8px !important;
-  font-size: 13.5px !important;
-  border: 1px solid #cbd5e1 !important;
-  background: #ffffff !important;
-  color: #334155 !important;
-}
-
-.cafe-container .filter-btn.active {
-  background: #d97706 !important;
-  border-color: #d97706 !important;
-  color: #ffffff !important;
-}
-
-/* Kafe kartochkalari */
-.cafe-container .cafe-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 14px !important;
-  padding: 18px !important;
-  margin-bottom: 12px !important;
-}
+  .button{
+    background-color: #1a77fa;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  }
+  .button:hover {
+    background: linear-gradient(#3487fb, #081a35);
+    transform: scale(1.1);
+  }

@@ -130,7 +130,6 @@ export default function Login() {
           <p className="text-sm text-[#8E8676] mt-1">Tizimga kirish uchun login va parolingizni kiriting</p>
         </div>
 
-        {/* Forma */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-3xl shadow-sm border border-[#E8E4D8] p-6 space-y-4"

@@ -135,14 +135,14 @@ if (loading) {
 return (
   <>
     <Navbar />
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+    <div className="cafe-container p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-amber-800">
+        <h1 className="text-2xl font-bold text-gray-600">
           Big Admin — Kafelar
         </h1>
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition"
+          className="cafe-qoshish"
         >
           + Kafe qo'shish
         </button>
@@ -150,15 +150,15 @@ return (
 
       {/* Statistika kartalari */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-white rounded-xl shadow p-3 border border-gray-100 text-center">
+        <div className="bg-slate-100 rounded-xl shadow p-3 border border-gray-100 text-center">
           <p className="text-xs text-gray-500">Jami</p>
           <p className="text-xl font-bold text-gray-800">{cafes.length}</p>
         </div>
-        <div className="bg-white rounded-xl shadow p-3 border border-gray-100 text-center">
+        <div className="bg-green-100 rounded-xl shadow p-3 border border-gray-100 text-center">
           <p className="text-xs text-gray-500">Faol</p>
           <p className="text-xl font-bold text-green-600">{activeCount}</p>
         </div>
-        <div className="bg-white rounded-xl shadow p-3 border border-gray-100 text-center">
+        <div className="bg-red-100 rounded-xl shadow p-3 border border-gray-100 text-center">
           <p className="text-xs text-gray-500">Bloklangan</p>
           <p className="text-xl font-bold text-red-600">{blockedCount}</p>
         </div>
@@ -189,13 +189,13 @@ return (
       {filteredCafes.length === 0 ? (
         <p className="text-gray-400 text-sm">Kafelar topilmadi</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {filteredCafes.map((cafe) => (
             <div
               key={cafe.id}
-              className="bg-white rounded-xl shadow border border-gray-100 p-4"
+              className="divlar"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start bg- white rounded-xl shadow border border-gray-100 p-4">
                 <div>
                   <h3 className="font-semibold text-gray-800">{cafe.name}</h3>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -241,7 +241,7 @@ return (
                   onClick={() => toggleCafeStatus(cafe)}
                   className={`text-xs px-3 py-1.5 rounded-md font-medium transition ${
                     cafe.status === "active"
-                      ? "bg-red-100 text-red-700 hover:bg-red-200"
+                      ? "bg-red-100 text-blue-500 hover:bg-blue-100"
                       : "bg-green-100 text-green-700 hover:bg-green-200"
                   }`}
                 >
@@ -272,8 +272,8 @@ return (
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Kafe nomi"
+                  className="input"
+                  placeholder=""
                 />
               </div>
 
@@ -286,8 +286,8 @@ return (
                   name="ownerName"
                   value={form.ownerName}
                   onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="To'liq ism"
+                  className="input"
+                  placeholder=""
                 />
               </div>
 
@@ -300,8 +300,8 @@ return (
                   name="phone"
                   value={form.phone}
                   onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="raqam kiriting"
+                  className="input"
+                  placeholder=""
                 />
               </div>
 
@@ -314,8 +314,8 @@ return (
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Shahar, tuman, ko'cha"
+                  className="input"
+                  placeholder=""
                 />
               </div>
 
@@ -329,7 +329,7 @@ return (
                     name="contractStart"
                     value={form.contractStart}
                     onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="inputs"
                   />
                 </div>
                 <div>
@@ -341,7 +341,7 @@ return (
                     name="contractEnd"
                     value={form.contractEnd}
                     onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="inputs"
                   />
                 </div>
               </div>
@@ -349,7 +349,7 @@ return (
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition"
+                  className="button"
                 >
                   Saqlash
                 </button>
@@ -359,7 +359,7 @@ return (
                     setModalOpen(false);
                     resetForm();
                   }}
-                  className="flex-1 border border-gray-300 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                  className="w-full text-center px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
                 >
                   Bekor qilish
                 </button>
