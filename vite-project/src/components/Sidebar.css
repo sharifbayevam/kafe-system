@@ -1,0 +1,475 @@
+/* ==========================================================================
+   Sidebar.css — "Dasturxon" CRM uchun navigatsiya paneli stillari
+   Milliy uslub: to'q qizil, oltin, jigarrang tonlari
+   ========================================================================== */
+
+:root {
+  --sb-bg: #2a1408;           /* to'q jigarrang-qora fon */
+  --sb-bg-light: #3d1f0f;     /* yengilroq jigarrang, hover uchun */
+  --sb-border: #4a2a16;
+  --sb-text-muted: rgba(240, 220, 200, 0.55);
+  --sb-text: #f5e9dc;
+  --sb-accent: #d4a72e;        /* oltin */
+  --sb-accent-bg: rgba(212, 167, 46, 0.14);
+  --sb-danger: #e05a4e;        /* to'q qizil-korall, chiqish tugmasi */
+}
+
+/* ---------- UMUMIY KONTEYNER ---------- */
+.sb-sidebar-desktop,
+.sb-sidebar-mobile {
+  background: linear-gradient(180deg, var(--sb-bg) 0%, #1c0d05 100%);
+  color: var(--sb-text);
+  z-index: 40;
+  user-select: none;
+}
+
+/* ---------- ADMIN: CHAP TOMON VERTIKAL PANEL ---------- */
+.sb-sidebar-desktop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 64px; /* kichik telefon — eng ixcham */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  border-right: 1px solid var(--sb-border);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+}
+
+.sb-logo {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--sb-accent-bg);
+  color: var(--sb-accent);
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+/* Katta telefonlar (480px+) */
+@media (min-width: 480px) {
+  .sb-sidebar-desktop {
+    width: 76px;
+    padding: 16px 0;
+  }
+  .sb-logo {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 20px;
+  }
+}
+
+/* Planshetlar (768px+) */
+@media (min-width: 768px) {
+  .sb-sidebar-desktop {
+    width: 96px;
+    padding: 22px 0;
+  }
+  .sb-logo {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 26px;
+    border-radius: 14px;
+  }
+}
+
+.sb-nav-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.sb-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 52px;
+  padding: 8px 2px;
+  border-radius: 12px;
+  color: var(--sb-text-muted);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.sb-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sb-text);
+}
+
+.sb-nav-item.active {
+  background: var(--sb-accent-bg);
+  color: var(--sb-accent);
+  font-weight: 600;
+  transform: translateY(-1px);
+}
+
+.sb-nav-item .sb-icon {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+}
+
+.sb-nav-label {
+  font-size: 9px;
+  line-height: 1.15;
+  text-align: center;
+}
+
+/* Katta telefonlar (480px+) */
+@media (min-width: 480px) {
+  .sb-nav-item {
+    width: 62px;
+    padding: 9px 3px;
+  }
+  .sb-nav-item .sb-icon {
+    width: 21px;
+    height: 21px;
+  }
+  .sb-nav-label {
+    font-size: 10px;
+  }
+}
+
+/* Planshetlar (768px+) */
+@media (min-width: 768px) {
+  .sb-nav-item {
+    width: 78px;
+    padding: 12px 4px;
+    border-radius: 16px;
+    gap: 5px;
+  }
+  .sb-nav-item .sb-icon {
+    width: 25px;
+    height: 25px;
+  }
+  .sb-nav-label {
+    font-size: 11px;
+  }
+}
+
+/* ---------- OFITSIANT / OSHPAZ / KASSIR: PASTKI PANEL ---------- */
+.sb-sidebar-mobile {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 58px; /* kichik telefon */
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom); /* iPhone home-indicator uchun joy */
+  border-top: 1px solid var(--sb-border);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.sb-nav-item-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 100%;
+  color: var(--sb-text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.sb-nav-item-mobile.active {
+  color: var(--sb-accent);
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+.sb-nav-item-mobile .sb-icon {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.8;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.sb-nav-label-mobile {
+  font-size: 9px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Katta telefonlar (480px+) */
+@media (min-width: 480px) {
+  .sb-sidebar-mobile {
+    height: 64px;
+  }
+  .sb-nav-item-mobile {
+    width: 76px;
+  }
+  .sb-nav-item-mobile .sb-icon {
+    width: 21px;
+    height: 21px;
+  }
+  .sb-nav-label-mobile {
+    font-size: 10px;
+  }
+}
+
+/* Planshetlar (768px+) */
+@media (min-width: 768px) {
+  .sb-sidebar-mobile {
+    height: 76px;
+  }
+  .sb-nav-item-mobile {
+    width: 100px;
+  }
+  .sb-nav-item-mobile .sb-icon {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 4px;
+  }
+  .sb-nav-label-mobile {
+    font-size: 12px;
+  }
+}
+
+/* ---------- TIL TANLASH ---------- */
+.sb-lang-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--sb-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sb-lang-btn.open {
+  color: var(--sb-text);
+}
+
+.sb-lang-code {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sb-lang-dropdown {
+  position: absolute;
+  background: var(--sb-bg);
+  border: 1px solid var(--sb-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  min-width: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 50;
+  animation: sb-fade-in 0.15s ease-out;
+}
+
+.sb-lang-dropdown.direction-up {
+  bottom: 68px;
+}
+
+.sb-lang-dropdown.direction-right {
+  top: 0;
+  left: 90px;
+}
+
+.sb-lang-option {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 8px;
+  color: rgba(240, 220, 200, 0.75);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sb-lang-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sb-lang-option.selected {
+  color: var(--sb-accent);
+  font-weight: 700;
+  background: var(--sb-accent-bg);
+}
+
+/* ---------- CHIQISH TUGMASI ---------- */
+.sb-logout-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sb-text-muted);
+  transition: color 0.2s ease;
+}
+
+.sb-logout-btn:hover {
+  color: var(--sb-danger);
+}
+
+/* ---------- CHIQISHNI TASDIQLASH MODALI ---------- */
+.sb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 5, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+  animation: sb-fade-in 0.15s ease-out;
+}
+
+.sb-modal-card {
+  background: #fffaf3;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.sb-modal-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(224, 90, 78, 0.12);
+  color: var(--sb-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.sb-modal-title {
+  color: #2a1408;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.sb-modal-text {
+  color: #7a6a5e;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+.sb-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sb-btn-confirm,
+.sb-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.sb-btn-confirm {
+  background: var(--sb-danger);
+  color: white;
+}
+
+.sb-btn-confirm:hover {
+  background: #c8483d;
+}
+
+.sb-btn-cancel {
+  background: #f1e7dc;
+  color: #4a3a2e;
+}
+
+.sb-btn-cancel:hover {
+  background: #e6d8c8;
+}
+
+.sb-btn-confirm:active,
+.sb-btn-cancel:active {
+  transform: scale(0.97);
+}
+
+@keyframes sb-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   ASOSIY KONTENT UCHUN JOY QOLDIRISH
+   Admin sahifalarining (Analytics, MenuManager, StaffList) eng tashqi
+   <div>'iga shu klassni qo'shing, aks holda kontent chap sidebar ostida
+   qolib ketadi. Masalan:
+   <div className="sb-page-content p-4 sm:p-6 max-w-4xl mx-auto"> ... </div>
+   ========================================================================== */
+.sb-page-content {
+  padding-left: 64px; /* kichik telefon — sb-sidebar-desktop kengligi bilan mos */
+}
+
+@media (min-width: 480px) {
+  .sb-page-content {
+    padding-left: 76px;
+  }
+}
+
+@media (min-width: 768px) {
+  .sb-page-content {
+    padding-left: 96px;
+  }
+}
+
+/* Pastki mobil panel bilan ishlaydigan sahifalar uchun (Ofitsiant/Oshpaz/Kassir)
+   pastdan bo'sh joy qoldirish, kontent panel ostida qolib ketmasligi uchun */
+.sb-page-content-bottom-nav {
+  padding-bottom: 74px; /* kichik telefon: 58px panel + zapas */
+}
+
+@media (min-width: 480px) {
+  .sb-page-content-bottom-nav {
+    padding-bottom: 80px;
+  }
+}
+
+@media (min-width: 768px) {
+  .sb-page-content-bottom-nav {
+    padding-bottom: 92px;
+  }
+}
