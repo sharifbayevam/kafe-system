@@ -1,4 +1,3 @@
-/* src/pages/BigAdmin/CafeList.css */
 
 @keyframes modalFadeIn {
   0% { opacity: 0; }
@@ -152,7 +151,7 @@
 }
 .cafe-input:focus {
   outline: none;
-  border-color: #d97706;
+  border-color: #201202;
   background: #fff;
   box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.12);
   transform: translateY(-1px);
@@ -161,17 +160,15 @@
   border-color: #e6c9a0;
 }
 
-/* Sana inputlari uchun ozgina moslashuv */
 input[type="date"].cafe-input {
   color: #78350f;
 }
 
-/* ===== Direktor bo'limi (ajratilgan karta) ===== */
 .cafe-director-section {
   margin-top: 6px;
   padding: 16px;
   border-radius: 16px;
-  background: linear-gradient(160deg, #fef3e2 0%, #fde8c8 100%);
+  background: linear-gradient(160deg, #451703 0%, #f25512 100%);
   border: 1.5px dashed #f0c987;
   position: relative;
 }
@@ -183,8 +180,8 @@ input[type="date"].cafe-input {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.6px;
-  color: #92400e;
-  background: #fff;
+  color: #52290e;
+  background: #bd9d7d;
   padding: 4px 10px;
   border-radius: 999px;
   margin-bottom: 12px;
@@ -203,7 +200,7 @@ input[type="date"].cafe-input {
 }
 .cafe-add-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(217, 119, 6, 0.42);
+  box-shadow: 0 8px 22px rgba(217, 119, 6, 0.4);
   filter: brightness(1.05);
 }
 .cafe-add-btn:active:not(:disabled) {
@@ -212,10 +209,12 @@ input[type="date"].cafe-input {
 
 .cafe-cancel-btn {
   transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  background: rgba(red, green, blue, alpha);
+  border-color: #b76b14;
 }
 .cafe-cancel-btn:hover {
   background: #fdf2e9;
-  border-color: #f0c987;
+  border-color: #2a2112;
 }
 .cafe-cancel-btn:active {
   transform: scale(0.97);
@@ -235,7 +234,7 @@ input[type="date"].cafe-input {
   width: 6px;
 }
 .cafe-modal-body::-webkit-scrollbar-thumb {
-  background: #f0c987;
+  background: #281e0d;
   border-radius: 999px;
 }
 .cafe-modal-body::-webkit-scrollbar-track {
