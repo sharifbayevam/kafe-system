@@ -31,8 +31,8 @@ const ERROR_MESSAGES = {
 // Agar oddiy login bo'lsa (masalan "ali123"), avtomatik "@kafe.com" qo'shadi.
 function toFirebaseEmail(rawInput) {
   const trimmed = rawInput.trim().toLowerCase();
-  if (trimmed.includes("@")) return trimmed;
-  return `${trimmed}@kafe.com`;
+  if (trimmed.includes("")) return trimmed;
+  return `${trimmed}`;
 }
 
 export default function Login() {

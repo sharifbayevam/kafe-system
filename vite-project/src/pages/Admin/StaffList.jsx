@@ -407,7 +407,7 @@ export default function StaffList() {
                     placeholder="login kiriting"
                   />
                   <span className="absolute right-3 text-xs text-gray-400 font-semibold select-none">
-                    @kafe.com
+                  
                   </span>
                 </div>
               </div>
