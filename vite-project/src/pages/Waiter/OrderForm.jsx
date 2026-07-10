@@ -267,7 +267,7 @@ export default function OrderForm() {
           type="text"
           value={tableNumber}
           onChange={(e) => setTableNumber(e.target.value)}
-          className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+          className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
           placeholder="Masalan: 5"
         />
       </div>
@@ -418,7 +418,7 @@ export default function OrderForm() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 placeholder="Masalan: ziravorsiz tayyorlansin"
               />
             </div>

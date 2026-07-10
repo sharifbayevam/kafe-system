@@ -11,18 +11,108 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useAuth } from "../../context/AuthContext";
-import { 
-  Image as LucideImage, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  ClipboardList, 
-  PlusCircle, 
-  FileText, 
-  CheckCircle, 
+import {
+  Image as LucideImage,
+  Plus,
+  Trash2,
+  Edit,
+  ClipboardList,
+  PlusCircle,
+  FileText,
+  CheckCircle,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  X,
+  ImageOff,
+  Sparkles,
 } from "lucide-react";
+
+// Taom nomida uchraydigan kalit so'zlarga qarab mos rasm tanlash uchun bank.
+// Har bir kalit so'z ostida bir nechta sifatli Unsplash rasmi bor — shunda
+// bir xil nomdagi taomlar ham har doim bitta rasmga qotib qolmaydi.
+const DISH_IMAGE_BANK = {
+  osh: [
+    "https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&auto=format&fit=crop&q=60",
+    "https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&auto=format&fit=crop&q=70",
+  ],
+  palov: [
+    "https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&auto=format&fit=crop&q=60",
+  ],
+  somsa: [
+    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=60",
+  ],
+  samsa: [
+    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=60",
+  ],
+  shashlik: [
+    "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&auto=format&fit=crop&q=60",
+  ],
+  kabob: [
+    "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&auto=format&fit=crop&q=60",
+  ],
+  manti: [
+    "https://images.unsplash.com/photo-1625398407796-82650a8c135f?w=400&auto=format&fit=crop&q=60",
+  ],
+  lag_mon: [
+    "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=60",
+  ],
+  lagmon: [
+    "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=60",
+  ],
+  norin: [
+    "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=60",
+  ],
+  salat: [
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&auto=format&fit=crop&q=60",
+  ],
+  non: [
+    "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=60",
+  ],
+  choy: [
+    "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=60",
+  ],
+  choy_kok: [
+    "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=60",
+  ],
+  sharbat: [
+    "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400&auto=format&fit=crop&q=60",
+  ],
+  tort: [
+    "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&auto=format&fit=crop&q=60",
+  ],
+  desert: [
+    "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&auto=format&fit=crop&q=60",
+  ],
+};
+
+// Kategoriya bo'yicha umumiy zaxira rasmlar (nomga mos kalit so'z topilmasa ishlatiladi)
+const CATEGORY_FALLBACK_IMAGES = {
+  taom: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60",
+  desert: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&auto=format&fit=crop&q=60",
+  ichimlik: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=60",
+  salat: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&auto=format&fit=crop&q=60",
+  boshqa: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60",
+};
+
+// Taom nomiga qarab eng mos rasmni tanlaydi.
+// 1) Avval nomdagi so'zlar DISH_IMAGE_BANK kalitlariga solishtiriladi
+// 2) Topilmasa, kategoriya bo'yicha umumiy zaxira rasm qaytariladi
+function suggestImageForDish(name, category) {
+  const normalized = (name || "")
+    .toLowerCase()
+    .replace(/[^a-zа-яʻʼ\s]/gi, " ")
+    .trim();
+
+  for (const keyword of Object.keys(DISH_IMAGE_BANK)) {
+    const searchKey = keyword.replace(/_/g, " ");
+    if (normalized.includes(searchKey) || normalized.includes(keyword)) {
+      const options = DISH_IMAGE_BANK[keyword];
+      return options[Math.floor(Math.random() * options.length)];
+    }
+  }
+
+  return CATEGORY_FALLBACK_IMAGES[category] || CATEGORY_FALLBACK_IMAGES.taom;
+}
 
 export default function MenuManager() {
   const { cafeId } = useAuth();
@@ -30,6 +120,7 @@ export default function MenuManager() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDish, setEditingDish] = useState(null);
+  const [fileError, setFileError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -66,6 +157,7 @@ export default function MenuManager() {
       imageUrl: "",
       available: true,
     });
+    setFileError("");
     setEditingDish(null);
   };
 
@@ -83,6 +175,7 @@ export default function MenuManager() {
       imageUrl: dish.imageUrl || "",
       available: dish.available ?? true,
     });
+    setFileError("");
     setEditingDish(dish);
     setModalOpen(true);
   };
@@ -100,10 +193,13 @@ export default function MenuManager() {
     if (!file) return;
 
     if (file.size > 1024 * 1024) {
-      alert("Rasm hajmi juda katta! Iltimos, 1 MB dan kichik rasm yuklang.");
+      setFileError("Rasm hajmi juda katta! Iltimos, 1 MB dan kichik rasm yuklang.");
+      // Inputni tozalaymiz — aks holda eski (noto'g'ri) tanlov ko'rinmasdan qolib ketadi
+      e.target.value = "";
       return;
     }
 
+    setFileError("");
     const reader = new FileReader();
     reader.onloadend = () => {
       setForm((prev) => ({
@@ -128,7 +224,10 @@ export default function MenuManager() {
       category: form.category,
       price: Number(form.price),
       description: form.description,
-      imageUrl: form.imageUrl,
+      // Agar foydalanuvchi hech qanday rasm tanlamagan bo'lsa, taom nomiga
+      // mos (yoki kategoriya bo'yicha) rasmni avtomatik tayinlaymiz —
+      // shunda barcha taomlar bir xil tashqi rasmga qotib qolmaydi.
+      imageUrl: form.imageUrl || suggestImageForDish(form.name, form.category),
       available: form.available,
     };
 
@@ -170,6 +269,11 @@ export default function MenuManager() {
 
   const categories = ["taom", "desert", "ichimlik", "salat", "boshqa"];
 
+  // Barcha modal inputlar uchun umumiy klass — och fon, to'q matn,
+  // yorqin fokus halqasi va yengil soyasi bilan
+  const inputClass =
+    "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white text-gray-900 placeholder:text-gray-400 shadow-sm transition-all duration-150 focus:outline-none focus:border-[#D4AF37] focus:ring-4 focus:ring-[#D4AF37]/15";
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64 gap-2">
@@ -189,7 +293,7 @@ export default function MenuManager() {
         </div>
         <button
           onClick={openAddModal}
-          className="bg-[#B22222] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#8B0000] active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+          className="bg-[#B22222] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#8B0000] active:scale-95 transition-all shadow-md shadow-red-900/20 flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Yangi Taom</span>
@@ -209,11 +313,20 @@ export default function MenuManager() {
               key={dish.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex transition-all hover:shadow-md"
             >
-              <img
-                src={dish.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&auto=format&fit=crop&q=60"}
-                alt={dish.name}
-                className="w-24 h-full object-cover bg-gray-50 min-h-[100px]"
-              />
+              {/* Har bir taomga o'zining rasmi, yo'q bo'lsa neytral
+                  "rasm yo'q" belgisi — bir xil tashqi rasm ishlatilmaydi */}
+              {dish.imageUrl ? (
+                <img
+                  src={dish.imageUrl}
+                  alt={dish.name}
+                  className="w-24 h-full object-cover bg-gray-50 min-h-[100px]"
+                />
+              ) : (
+                <div className="w-24 min-h-[100px] bg-gray-50 flex flex-col items-center justify-center gap-1 shrink-0">
+                  <ImageOff className="w-5 h-5 text-gray-300" />
+                  <span className="text-[9px] text-gray-300 font-medium">Rasm yo'q</span>
+                </div>
+              )}
               <div className="flex-1 p-3 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start gap-1">
@@ -243,8 +356,7 @@ export default function MenuManager() {
                     {Number(dish.price).toLocaleString()} so'm
                   </p>
                 </div>
-                
-                {/* Tugmalar */}
+
                 <div className="flex gap-1.5 mt-3 pt-2 border-t border-gray-50">
                   <button
                     onClick={() => openEditModal(dish)}
@@ -256,8 +368,8 @@ export default function MenuManager() {
                   <button
                     onClick={() => toggleAvailability(dish)}
                     className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium transition ${
-                      dish.available 
-                        ? "border-amber-200 text-amber-700 hover:bg-amber-50" 
+                      dish.available
+                        ? "border-amber-200 text-amber-700 hover:bg-amber-50"
                         : "border-blue-200 text-blue-700 hover:bg-blue-50"
                     }`}
                   >
@@ -277,21 +389,36 @@ export default function MenuManager() {
         </div>
       )}
 
-      {/* Modal oyna */}
+      {/* Modal oyna — soyali, yorqin uslub */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 max-h-[90vh] overflow-y-auto border border-gray-100">
-            <div className="flex items-center gap-2 mb-4 border-b pb-2">
-              {editingDish ? (
-                <Edit className="text-gray-700 w-5 h-5" />
-              ) : (
-                <PlusCircle className="text-gray-700 w-5 h-5" />
-              )}
-              <h2 className="text-base font-bold text-gray-800">
-                {editingDish ? "Taomni tahrirlash" : "Yangi taom qo'shish"}
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 w-full max-w-md p-5 max-h-[90vh] overflow-y-auto border border-gray-100 animate-[slideDown_0.25s_ease-out]">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                {editingDish ? (
+                  <>
+                    <Edit className="text-[#8B4513] w-4 h-4" />
+                    Taomni tahrirlash
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="text-[#8B4513] w-4 h-4" />
+                    Yangi taom qo'shish
+                  </>
+                )}
               </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalOpen(false);
+                  resetForm();
+                }}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
                 <label className="text-xs font-bold text-gray-600 block mb-1">Taom nomi</label>
@@ -300,7 +427,7 @@ export default function MenuManager() {
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                  className={inputClass}
                   placeholder="Masalan: Somsa, Shashlik"
                 />
               </div>
@@ -312,7 +439,7 @@ export default function MenuManager() {
                     name="category"
                     value={form.category}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-[#D4AF37] capitalize"
+                    className={`${inputClass} capitalize`}
                   >
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>
@@ -329,7 +456,7 @@ export default function MenuManager() {
                     name="price"
                     value={form.price}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                    className={inputClass}
                     placeholder="35000"
                   />
                 </div>
@@ -342,40 +469,87 @@ export default function MenuManager() {
                   value={form.description}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                  className={inputClass}
                   placeholder="Taom tarkibi haqida ma'lumot..."
                 />
               </div>
 
               {/* Rasm yuklash bo'limi */}
-              <div className="border border-dashed border-gray-200 rounded-xl p-3 bg-gray-50/50">
-                <label className="text-xs font-bold text-gray-700 flex items-center gap-2 mb-1 cursor-pointer">
-                  <LucideImage size={16} className="text-gray-500" />
-                  <span>Rasm yuklash (Galereyadan)</span>
-                </label>            
+              <div className="border border-dashed border-gray-200 rounded-xl p-3 bg-gray-50/60">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-2 cursor-pointer">
+                    <LucideImage size={16} className="text-gray-500" />
+                    <span>Rasm yuklash (Galereyadan)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!form.name.trim()) {
+                        setFileError("Avval taom nomini kiriting, shundan keyin mos rasm topamiz.");
+                        return;
+                      }
+                      setFileError("");
+                      setForm((prev) => ({
+                        ...prev,
+                        imageUrl: suggestImageForDish(form.name, form.category),
+                      }));
+                    }}
+                    className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-[#8B4513] bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg hover:bg-amber-100 transition active:scale-95"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Nomiga mos rasm topish</span>
+                  </button>
+                </div>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
                   className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer"
                 />
-                
-                <div className="text-center my-2 text-[10px] text-gray-400 font-bold">— YOKI LINK QO'YISH —</div>
-                
+
+                {fileError && (
+                  <p className="text-[11px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 mt-2">
+                    {fileError}
+                  </p>
+                )}
+
+                <div className="text-center my-2 text-[10px] text-gray-400 font-bold">
+                  — YOKI LINK QO'YISH —
+                </div>
+
                 <input
                   type="text"
                   name="imageUrl"
                   value={form.imageUrl && !form.imageUrl.startsWith("data:image") ? form.imageUrl : ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#D4AF37]"
+                  className={`${inputClass} py-1.5 text-xs`}
                   placeholder="https://images.unsplash.com/... (ixtiyoriy)"
                 />
 
-                {/* Tanlangan rasmning kichik ko'rinishi (Preview) */}
-                {form.imageUrl && (
-                  <div className="mt-2 flex items-center gap-2 bg-white p-1.5 rounded-lg border">
-                    <img src={form.imageUrl} alt="Preview" className="w-10 h-10 object-cover rounded-md" />
-                    <span className="text-[10px] text-green-600 font-medium">Rasm muvaffaqiyatli tanlandi!</span>
+                {/* Tanlangan rasmning kichik ko'rinishi (Preview) + tozalash tugmasi */}
+                {form.imageUrl ? (
+                  <div className="mt-2 flex items-center gap-2 bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm">
+                    <img
+                      src={form.imageUrl}
+                      alt="Preview"
+                      className="w-10 h-10 object-cover rounded-md shrink-0"
+                    />
+                    <span className="text-[10px] text-green-600 font-medium flex-1">
+                      Rasm muvaffaqiyatli tanlandi!
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, imageUrl: "" }))}
+                      className="text-gray-400 hover:text-red-500 transition p-1"
+                      title="Rasmni olib tashlash"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2 bg-white p-1.5 rounded-lg border border-gray-200 text-gray-400">
+                    <ImageOff className="w-4 h-4 shrink-0" />
+                    <span className="text-[10px]">Hozircha rasm tanlanmagan</span>
                   </div>
                 )}
               </div>
@@ -394,10 +568,10 @@ export default function MenuManager() {
                 </label>
               </div>
 
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3 border-t border-gray-100">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#B22222] text-white py-2 rounded-xl text-xs font-bold hover:bg-[#8B0000] transition"
+                  className="flex-1 bg-[#B22222] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-[#8B0000] active:scale-95 transition-all shadow-md shadow-red-900/20"
                 >
                   Saqlash
                 </button>
@@ -407,7 +581,7 @@ export default function MenuManager() {
                     setModalOpen(false);
                     resetForm();
                   }}
-                  className="flex-1 border border-gray-200 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-500 transition"
+                  className="flex-1 border border-gray-200 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-500 transition active:scale-95"
                 >
                   Bekor qilish
                 </button>

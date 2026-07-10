@@ -10,25 +10,26 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useAuth } from "../../context/AuthContext";
-import { 
-  Users, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  UserX, 
-  UserCheck, 
-  DollarSign, 
-  CheckCircle, 
-  Key, 
-  Mail, 
-  Phone, 
+import {
+  Users,
+  Plus,
+  Edit,
+  Trash2,
+  UserX,
+  UserCheck,
+  DollarSign,
+  CheckCircle,
+  Key,
+  Mail,
+  Phone,
   Briefcase,
   RefreshCw,
-  Wallet
+  Wallet,
+  X,
 } from "lucide-react";
 
 export default function StaffList() {
-  const { cafeId, registerStaff } = useAuth(); // registerStaff funksiyasi context'dan olindi
+  const { cafeId, registerStaff } = useAuth();
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function StaffList() {
 
   const [form, setForm] = useState({
     fullName: "",
-    username: "", // Email o'rniga direktor tushunadigan sodda username qilindi
+    username: "",
     password: "",
     role: "waiter",
     phone: "",
@@ -55,7 +56,7 @@ export default function StaffList() {
         id: d.id,
         ...d.data(),
       }));
-      setStaff(data.filter(u => u.role !== "bigadmin"));
+      setStaff(data.filter((u) => u.role !== "bigadmin"));
       setLoading(false);
     });
 
@@ -88,9 +89,8 @@ export default function StaffList() {
   };
 
   const openEditModal = (person) => {
-    // Tahrirlashda foydalanuvchining emailidan @kafe.com qismini olib tashlab ko'rsatamiz
     const currentUsername = person.email ? person.email.split("@")[0] : "";
-    
+
     setForm({
       fullName: person.fullName || "",
       username: currentUsername,
@@ -117,7 +117,6 @@ export default function StaffList() {
       return;
     }
 
-    // MUHIM JOYA: Direktor kiritgan sodda loginni orqasiga avtomat @kafe.com ulanadi
     const fullEmail = `${form.username.trim().toLowerCase()}@kafe.com`;
 
     const extraData = {
@@ -127,20 +126,17 @@ export default function StaffList() {
       phone: form.phone,
       salary: Number(form.salary) || 0,
       status: form.status,
-      // Tahrirlash paytida asoratsiz yangilanishi uchun parolni ham saqlaymiz
-      password: form.password, 
+      password: form.password,
     };
 
     try {
       if (editingStaff) {
-        // Tahrirlash bo'lsa shunchaki Firestore'dagi hujjatini yangilaymiz
         await updateDoc(doc(db, "users", editingStaff.id), {
           ...extraData,
-          email: fullEmail
+          email: fullEmail,
         });
         alert("Xodim ma'lumotlari muvaffaqiyatli yangilandi!");
       } else {
-        // Yangi xodim qo'shish bo'lsa Context'dagi registerStaff avtomat ham Auth'da ham Firestore'da ochadi!
         await registerStaff(fullEmail, form.password, extraData);
         alert("Yangi xodim muvaffaqiyatli qo'shildi!");
       }
@@ -189,10 +185,12 @@ export default function StaffList() {
     }
   };
 
-  const totalSalaries = staff.reduce(
-    (sum, p) => sum + (Number(p.salary) || 0),
-    0
-  );
+  const totalSalaries = staff.reduce((sum, p) => sum + (Number(p.salary) || 0), 0);
+
+  // Barcha modal inputlar uchun umumiy klass — och fon, to'q matn,
+  // yorqin fokus halqasi va yengil soyasi bilan
+  const inputClass =
+    "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white text-gray-900 placeholder:text-gray-400 shadow-sm transition-all duration-150 focus:outline-none focus:border-[#D4AF37] focus:ring-4 focus:ring-[#D4AF37]/15";
 
   if (loading) {
     return (
@@ -213,7 +211,7 @@ export default function StaffList() {
         </div>
         <button
           onClick={openAddModal}
-          className="bg-[#B22222] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#8B0000] active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+          className="bg-[#B22222] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#8B0000] active:scale-95 transition-all shadow-md shadow-red-900/20 flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Xodim qo'shish</span>
@@ -280,15 +278,18 @@ export default function StaffList() {
                     </div>
 
                     <div className="space-y-1 mt-3 border-t pt-2 border-gray-50 text-xs text-gray-500">
-                      <p className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-gray-400" /> {person.email}</p>
-                      <p className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400" /> {person.phone}</p>
+                      <p className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-gray-400" /> {person.email}
+                      </p>
+                      <p className="flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-gray-400" /> {person.phone}
+                      </p>
                       <p className="text-[#B22222] font-extrabold text-sm pt-1">
                         {Number(person.salary).toLocaleString()} so'm / oy
                       </p>
                     </div>
                   </div>
 
-                  {/* Amallar tugmalari */}
                   <div className="flex gap-1.5 mt-4 pt-2 border-t border-gray-50">
                     <button
                       onClick={() => openEditModal(person)}
@@ -305,7 +306,11 @@ export default function StaffList() {
                           : "border-green-200 text-green-700 hover:bg-green-50"
                       }`}
                     >
-                      {person.status === "active" ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                      {person.status === "active" ? (
+                        <UserX className="w-3 h-3" />
+                      ) : (
+                        <UserCheck className="w-3 h-3" />
+                      )}
                       <span>{person.status === "active" ? "Bloklash" : "Aktivlashtirish"}</span>
                     </button>
                     <button
@@ -347,14 +352,19 @@ export default function StaffList() {
                 <div>
                   <p className="font-bold text-gray-800 text-sm">{person.fullName}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {roleLabels[person.role] || person.role} • <span className="font-semibold text-gray-700">{Number(person.salary).toLocaleString()} so'm</span>
+                    {roleLabels[person.role] || person.role} •{" "}
+                    <span className="font-semibold text-gray-700">
+                      {Number(person.salary).toLocaleString()} so'm
+                    </span>
                   </p>
                   <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3 text-green-500" />
                     Oxirgi to'lov:{" "}
                     <span className="font-medium text-gray-600">
                       {person.salaryHistory?.length > 0
-                        ? new Date(person.salaryHistory[person.salaryHistory.length - 1].date).toLocaleDateString()
+                        ? new Date(
+                            person.salaryHistory[person.salaryHistory.length - 1].date
+                          ).toLocaleDateString()
                         : "To'lanmagan"}
                     </span>
                   </p>
@@ -371,13 +381,36 @@ export default function StaffList() {
         </div>
       )}
 
-      {/* Modal Oyna */}
+      {/* Modal Oyna — soyali, yorqin uslub */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 max-h-[95vh] overflow-y-auto border border-gray-100">
-            <h2 className="text-base font-bold mb-4 text-gray-800 border-b pb-2">
-              {editingStaff ? "📝 Xodim ma'lumotlarini tahrirlash" : "👤 Yangi xodim biriktirish"}
-            </h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 w-full max-w-md p-5 max-h-[95vh] overflow-y-auto border border-gray-100 animate-[slideDown_0.25s_ease-out]">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                {editingStaff ? (
+                  <>
+                    <Edit className="w-4 h-4 text-[#8B4513]" />
+                    Xodim ma'lumotlarini tahrirlash
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 text-[#8B4513]" />
+                    Yangi xodim biriktirish
+                  </>
+                )}
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalOpen(false);
+                  resetForm();
+                }}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
                 <label className="text-xs font-bold text-gray-600 block mb-1">To'liq ism</label>
@@ -386,33 +419,31 @@ export default function StaffList() {
                   name="fullName"
                   value={form.fullName}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                  className={inputClass}
                   placeholder="Ism va familiya"
                 />
               </div>
 
-              {/* Tizimga kirish Login qismi (Faqat Login so'zi yoziladi) */}
               <div>
                 <label className="text-xs font-bold text-gray-600 flex items-center gap-1 mb-1">
-                  <Mail className="w-3 h-3 text-gray-400" /> Xodim logini 
+                  <Mail className="w-3 h-3 text-gray-400" /> Xodim logini
                 </label>
                 <div className="relative flex items-center">
                   <input
                     type="text"
                     name="username"
-                    disabled={!!editingStaff} // Tahrirlashda o'zgartirib bo'lmaydi
+                    disabled={!!editingStaff}
                     value={form.username}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37] pr-24 disabled:bg-gray-50"
+                    className={`${inputClass} pr-24 disabled:bg-gray-100 disabled:text-gray-500 disabled:shadow-none`}
                     placeholder="login kiriting"
                   />
                   <span className="absolute right-3 text-xs text-gray-400 font-semibold select-none">
-                  
+                    
                   </span>
                 </div>
               </div>
 
-              {/* Tizimga kirish Parol qismi */}
               <div>
                 <label className="text-xs font-bold text-gray-600 flex items-center gap-1 mb-1">
                   <Key className="w-3 h-3 text-gray-400" /> Kirish paroli
@@ -422,7 +453,7 @@ export default function StaffList() {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                  className={inputClass}
                   placeholder="Kamida 6 ta belgi"
                 />
               </div>
@@ -436,7 +467,7 @@ export default function StaffList() {
                     name="role"
                     value={form.role}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-[#D4AF37]"
+                    className={inputClass}
                   >
                     <option value="waiter">Ofitsiant</option>
                     <option value="chef">Oshpaz</option>
@@ -452,7 +483,7 @@ export default function StaffList() {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
+                    className={inputClass}
                     placeholder="+998901234567"
                   />
                 </div>
@@ -465,15 +496,15 @@ export default function StaffList() {
                   name="salary"
                   value={form.salary}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#D4AF37]"
-                  placeholder="Xar oylik belgilangan maosh"
+                  className={inputClass}
+                  placeholder="Har oylik belgilangan maosh"
                 />
               </div>
 
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3 border-t border-gray-100">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#B22222] text-white py-2 rounded-xl text-xs font-bold hover:bg-[#8B0000] transition"
+                  className="flex-1 bg-[#B22222] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-[#8B0000] active:scale-95 transition-all shadow-md shadow-red-900/20"
                 >
                   Saqlash
                 </button>
@@ -483,7 +514,7 @@ export default function StaffList() {
                     setModalOpen(false);
                     resetForm();
                   }}
-                  className="flex-1 border border-gray-200 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-500 transition"
+                  className="flex-1 border border-gray-200 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-500 transition active:scale-95"
                 >
                   Bekor qilish
                 </button>
