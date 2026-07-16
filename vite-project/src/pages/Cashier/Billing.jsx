@@ -18,6 +18,8 @@ export default function Billing() {
   const [filter, setFilter] = useState("unpaid"); // unpaid, paid, all
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [discountPercent, setDiscountPercent] = useState(0);
+  // 🔍 Qidiruv matni uchun yangi state qo'shildi
+  const [searchTerm, setSearchTerm] = useState(""); 
 
   useEffect(() => {
     if (!cafeId) return;
@@ -79,7 +81,7 @@ export default function Billing() {
     }
   };
 
-  // 🖨️ Professional Termal Chek (58mm/80mm) chiqarish funksiyasi
+  // 🖨️ Professional Termal Chek chiqarish funksiyasi
   const handlePrintReceipt = (order) => {
     const dateStr = order.createdAt?.toDate 
       ? order.createdAt.toDate().toLocaleString("uz-UZ") 
@@ -87,7 +89,6 @@ export default function Billing() {
 
     const printWindow = window.open("", "_blank", "width=400,height=600");
     
-    // Agar buyurtma allaqachon to'langan bo'lsa va chegirmasi bo'lsa, uni chekda hisoblash
     const hasDiscount = order.discountPercent > 0;
     const finalPrice = order.totalPrice;
     const originalPrice = order.originalPrice || order.totalPrice;
@@ -171,14 +172,24 @@ export default function Billing() {
   };
 
   const getFilteredOrders = () => {
-    if (filter === "all") return orders;
-    if (filter === "unpaid")
-      return orders.filter((o) => o.paymentStatus !== "paid");
-    if (filter === "paid")
-      return orders.filter((o) => o.paymentStatus === "paid");
-    return orders;
-  };
+    let result = orders;
+    if (filter === "unpaid") {
+      result = orders.filter((o) => o.paymentStatus !== "paid");
+    } else if (filter === "paid") {
+      result = orders.filter((o) => o.paymentStatus === "paid");
+    }
 
+    // 🔍 To'g'ri qidiruv filtrlash mantiqi shu yerga ulandi
+    if (searchTerm.trim() !== "") {
+      result = result.filter((order) => {
+        const tableNumber = order.tableNumber ? order.tableNumber.toString() : "";
+        return tableNumber.includes(searchTerm);
+      });
+    }
+
+    return result;
+  };
+  
   const filteredOrders = getFilteredOrders();
 
   const getDailyStats = () => {
@@ -263,25 +274,36 @@ export default function Billing() {
           </div>
         </div>
 
-        {/* Filter Tugmalari */}
-        <div className="flex p-1 bg-gray-200/60 rounded-xl max-w-sm mb-6">
-          {[
-            { key: "unpaid", label: "To'lanmagan" },
-            { key: "paid", label: "To'langan" },
-            { key: "all", label: "Barchasi" },
-          ].map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`flex-1 py-2 text-center rounded-lg text-xs font-bold tracking-wide transition-all ${
-                filter === f.key
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Filter va Qidiruv qatori */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex p-1 bg-gray-200/60 rounded-xl w-full sm:max-w-sm">
+            {[
+              { key: "unpaid", label: "To'lanmagan" },
+              { key: "paid", label: "To'langan" },
+              { key: "all", label: "Barchasi" },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`flex-1 py-2 text-center rounded-lg text-xs font-bold tracking-wide transition-all ${
+                  filter === f.key
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 🔍 Qidiruv input dizayni chiroyli holatga keltirildi */}
+          <input 
+            type="text" 
+            placeholder="Stol raqamini kiriting..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:max-w-xs px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-xs font-medium" 
+          />
         </div>
 
         {/* Cheklar ro'yxati */}
