@@ -115,7 +115,6 @@ export default function Login() {
       `}</style>
 
       <div className="w-full max-w-sm">
-        {/* Logo / sarlavha bloki */}
         <div className="flex flex-col items-center mb-8">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 relative overflow-hidden"
@@ -124,8 +123,8 @@ export default function Login() {
             <GirihMark />
             <LogIn size={26} className="text-white relative" />
           </div>
-          <h1 className="disp text-2xl font-extrabold text-[#241F19] tracking-tight">
-            Chaihana Nazorat
+          <h1 className="disp text-2xl font-extrabold text-[#241F19] tracking-tight font-italic">
+            Tizimga kirish
           </h1>
           <p className="text-sm text-[#8E8676] mt-1">Tizimga kirish uchun login va parolingizni kiriting</p>
         </div>
