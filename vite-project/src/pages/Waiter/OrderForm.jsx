@@ -253,7 +253,7 @@ export default function OrderForm() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto pb-24 overflow-x-hidden">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto overflow-x-hidden" style={{ paddingBottom: "220px" }}>
       <h1 className="text-2xl font-bold text-amber-800 mb-4">
         Yangi buyurtma
       </h1>
@@ -360,13 +360,18 @@ export default function OrderForm() {
 
       {/* Savat tugmasi */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-40">
+        <div className="fixed bottom-[76px] left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40">
           <button
             onClick={() => setShowCart(true)}
-            className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold flex justify-between items-center px-4"
+            className="w-full bg-amber-600 text-white py-3.5 rounded-xl font-semibold flex justify-between items-center px-5 shadow-md hover:bg-amber-700 active:scale-[0.98] transition-all duration-200"
           >
-            <span>{totalItems} ta mahsulot</span>
-            <span>{totalPrice.toLocaleString()} so'm</span>
+            <span className="flex items-center gap-2">
+              <span className="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                {totalItems}
+              </span>
+              ta mahsulot
+            </span>
+            <span className="text-base">{totalPrice.toLocaleString()} so'm</span>
           </button>
         </div>
       )}
