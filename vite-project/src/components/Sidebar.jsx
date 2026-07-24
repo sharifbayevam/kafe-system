@@ -79,7 +79,9 @@ export default function Sidebar() {
         onClick={() => setLangOpen(!langOpen)}
         className={`sb-lang-btn ${langOpen ? "open" : ""}`}
       >
-        <Globe className="sb-icon" />
+        <span className="sb-icon-wrap">
+          <Globe className="sb-icon" />
+        </span>
         <span className="sb-lang-code">
           {languages.find((l) => l.code === currentLang)?.label || "UZ"}
         </span>
@@ -138,7 +140,9 @@ export default function Sidebar() {
                 to={to}
                 className={`sb-nav-item ${location.pathname.includes(match) ? "active" : ""}`}
               >
-                <Icon className="sb-icon" />
+                <span className="sb-icon-wrap">
+                  <Icon className="sb-icon" />
+                </span>
                 <span className="sb-nav-label">{t(key) || fallback}</span>
               </Link>
             ))}
@@ -149,7 +153,9 @@ export default function Sidebar() {
           </div>
 
           <button onClick={() => setShowLogoutModal(true)} className="sb-logout-btn" style={{ width: 64, padding: "10px 0" }}>
-            <LogOut className="sb-icon" />
+            <span className="sb-icon-wrap">
+              <LogOut className="sb-icon" />
+            </span>
             <span className="sb-nav-label">{t("close_window") || "Chiqish"}</span>
           </button>
         </div>
@@ -171,7 +177,9 @@ export default function Sidebar() {
             to={to}
             className={`sb-nav-item-mobile ${location.pathname.includes(match) ? "active" : ""}`}
           >
-            <Icon className="sb-icon" />
+            <span className="sb-icon-wrap">
+              <Icon className="sb-icon" />
+            </span>
             <span className="sb-nav-label-mobile">{t(key) || fallback}</span>
           </Link>
         ))}
@@ -181,7 +189,9 @@ export default function Sidebar() {
         </div>
 
         <button onClick={() => setShowLogoutModal(true)} className="sb-nav-item-mobile" style={{ background: "none", border: "none", cursor: "pointer" }}>
-          <LogOut className="sb-icon" />
+          <span className="sb-icon-wrap">
+            <LogOut className="sb-icon" />
+          </span>
           <span className="sb-nav-label-mobile">{t("close_window") || "Oynani yopish"}</span>
         </button>
       </div>
