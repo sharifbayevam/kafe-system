@@ -150,7 +150,7 @@ export default function OrderForm() {
           value={tableNumber}
           onChange={(e) => setTableNumber(e.target.value)}
           className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-          placeholder="Masalan: 5"
+          placeholder=""
         />
       </div>
 
