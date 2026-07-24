@@ -150,7 +150,6 @@ export default function OrderForm() {
             icon: "🍲"
           });
 
-          // Eski buzilgan audio o'rniga yangi xavfsiz funksiya chaqiriladi
           playCleanSmsSound();
         }
       });
@@ -204,6 +203,7 @@ export default function OrderForm() {
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // YANGILANGAN VA FILTRLANGAN BUYURTMA YUBORISH
   const handleSubmitOrder = async () => {
     if (!tableNumber) {
       alert("Iltimos, stol raqamini kiriting");
@@ -216,17 +216,45 @@ export default function OrderForm() {
 
     setSubmitting(true);
     try {
+      // 1. Kassa uchun barcha tanlangan elementlar
+      const formattedItems = cart.map((item) => ({
+        id: item.id || "",
+        name: item.name || "",
+        price: Number(item.price) || 0,
+        quantity: Number(item.quantity) || 1,
+        category: item.category || "",
+      }));
+
+      // 2. Ichimlik ekanligini aniqlaydigan kalit so'zlar
+      const drinkKeywords = [
+        "ichimlik", "ichimliklar", "drink", "drinks", "bar",
+        "suv", "water", "choy", "tea", "cola", "coca", "pepsi", "fanta",
+        "sprite", "sok", "juice", "fuse", "limonad", "kofe", "coffee", "1.5l"
+      ];
+
+      // 3. Oshxona uchun faqat taom va desertlarni saralab olish
+      const kitchenItems = formattedItems.filter((item) => {
+        const itemCat = String(item.category || "").toLowerCase();
+        const itemName = String(item.name || "").toLowerCase();
+
+        const isDrink = drinkKeywords.some(
+          (word) => itemCat.includes(word) || itemName.includes(word)
+        );
+
+        return !isDrink;
+      });
+
+      // 4. Agar faqat ichimlik bo'lsa, oshxona statusi "not_required" (oshxonaga tushmaydi)
+      const initialKitchenStatus = kitchenItems.length > 0 ? "pending" : "not_required";
+
       await addDoc(collection(db, "orders"), {
         cafeId,
         tableNumber,
-        items: cart.map((item) => ({
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        })),
+        items: formattedItems,
+        kitchenItems: kitchenItems,
         totalPrice,
         note,
-        kitchenStatus: "pending",
+        kitchenStatus: initialKitchenStatus,
         paymentStatus: "unpaid",
         createdAt: new Date(),
       });
@@ -235,7 +263,12 @@ export default function OrderForm() {
       setTableNumber("");
       setNote("");
       setShowCart(false);
-      toast.info("🚀 Buyurtma oshxonaga yuborildi!");
+
+      if (initialKitchenStatus === "not_required") {
+        toast.info("🥤 Buyurtma qabul qilindi (Faqat ichimliklar)");
+      } else {
+        toast.info("🚀 Buyurtma oshxonaga yuborildi!");
+      }
     } catch (error) {
       console.error("Buyurtmani yuborishda xatolik:", error);
       alert("Xatolik yuz berdi, qaytadan urinib ko'ring");
@@ -253,7 +286,7 @@ export default function OrderForm() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto overflow-x-hidden" style={{ paddingBottom: "220px" }}>
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto pb-24 overflow-x-hidden">
       <h1 className="text-2xl font-bold text-amber-800 mb-4">
         Yangi buyurtma
       </h1>
@@ -360,18 +393,13 @@ export default function OrderForm() {
 
       {/* Savat tugmasi */}
       {cart.length > 0 && (
-        <div className="fixed bottom-[76px] left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-40">
           <button
             onClick={() => setShowCart(true)}
-            className="w-full bg-amber-600 text-white py-3.5 rounded-xl font-semibold flex justify-between items-center px-5 shadow-md hover:bg-amber-700 active:scale-[0.98] transition-all duration-200"
+            className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold flex justify-between items-center px-4"
           >
-            <span className="flex items-center gap-2">
-              <span className="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-xs">
-                {totalItems}
-              </span>
-              ta mahsulot
-            </span>
-            <span className="text-base">{totalPrice.toLocaleString()} so'm</span>
+            <span>{totalItems} ta mahsulot</span>
+            <span>{totalPrice.toLocaleString()} so'm</span>
           </button>
         </div>
       )}
